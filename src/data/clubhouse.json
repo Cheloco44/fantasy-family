@@ -1,0 +1,74 @@
+{
+  "league": "Redlands Possum Busters",
+  "season": "2026\u201327",
+  "leagueId": "1399646897",
+  "timezone": "America/Phoenix",
+  "refreshTime": "05:00",
+  "mode": "demo",
+  "lastSuccessfulUpdate": null,
+  "managers": [
+    {
+      "slug": "demo-a",
+      "alias": "Demo Manager A",
+      "team": "Bench Warmers (demo)",
+      "initials": "DA",
+      "accent": "orange",
+      "favoriteTeam": "Not supplied",
+      "bio": "Sample profile only. Replace this with a manager-approved, self-written biography.",
+      "scoutingReport": null,
+      "approved": false
+    },
+    {
+      "slug": "demo-b",
+      "alias": "Demo Manager B",
+      "team": "Puck Around (demo)",
+      "initials": "DB",
+      "accent": "blue",
+      "favoriteTeam": "Not supplied",
+      "bio": "Sample profile only. Your actual alias, team identity, and biography will go here after approval.",
+      "scoutingReport": null,
+      "approved": false
+    }
+  ],
+  "memes": [
+    {
+      "id": "bench",
+      "image": "memes/bench.svg",
+      "caption": "The bench has requested a performance bonus.",
+      "contributor": "Neo \u00b7 demo artwork",
+      "date": "2026-11-11",
+      "tags": [
+        "bench",
+        "2026-27"
+      ],
+      "manager": "demo-a",
+      "featured": true
+    },
+    {
+      "id": "goalie",
+      "image": "memes/goalie.svg",
+      "caption": "Goaltending: where confidence goes to get pulled.",
+      "contributor": "Neo \u00b7 demo artwork",
+      "date": "2026-11-11",
+      "tags": [
+        "goalies",
+        "2026-27"
+      ],
+      "manager": "demo-b",
+      "featured": false
+    },
+    {
+      "id": "waivers",
+      "image": "memes/waivers.svg",
+      "caption": "This waiver claim will fix everything. Again.",
+      "contributor": "Neo \u00b7 demo artwork",
+      "date": "2026-11-11",
+      "tags": [
+        "waivers",
+        "2026-27"
+      ],
+      "manager": "demo-a",
+      "featured": false
+    }
+  ]
+}

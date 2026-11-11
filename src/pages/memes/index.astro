@@ -1,0 +1,21 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import data from '../../data/clubhouse.json';
+const base=import.meta.env.BASE_URL;
+const tags=[...new Set(data.memes.flatMap(m=>m.tags))].sort();
+---
+<Layout title="Meme locker" active="memes"><div class="eyebrow">THE RECEIPTS DEPARTMENT</div><h1>The meme locker.</h1><p class="muted">Original demo artwork for the preview. No family photos, no attributed family quotes. Future contributions are admin-managed and approved before publication.</p><div class="filters"><label>Search captions<input id="meme-search" type="search" placeholder="Bench, goalie, waivers…" /></label><label>Tag<select id="tag-filter"><option value="">All tags</option>{tags.map(t=><option value={t}>{t}</option>)}</select></label><label>Manager<select id="manager-filter"><option value="">All demo managers</option>{data.managers.map(m=><option value={m.slug}>{m.alias}</option>)}</select></label><button class="btn" id="clear-filters" type="button">Reset</button></div><p id="results" class="small muted" aria-live="polite">Showing {data.memes.length} demo memes</p><div class="gallery">{data.memes.map(m=><figure class="meme" data-caption={m.caption.toLowerCase()} data-tags={JSON.stringify(m.tags)} data-manager={m.manager}><img src={`${base}${m.image}`} alt={m.caption} width="780" height="600" loading="lazy"/><figcaption><h2>{m.caption}</h2><p class="small muted">{m.contributor} · <time datetime={m.date}>{m.date}</time></p><div class="tags">{m.tags.map(t=><span>{t}</span>)}</div></figcaption></figure>)}</div><p id="empty-results" hidden>No memes match those filters. Reset to bring the bench back.</p><noscript><p>Filtering needs JavaScript. All memes remain visible without it.</p></noscript></Layout>
+<script>
+const search=document.querySelector<HTMLInputElement>('#meme-search')!;
+const tag=document.querySelector<HTMLSelectElement>('#tag-filter')!;
+const manager=document.querySelector<HTMLSelectElement>('#manager-filter')!;
+const cards=[...document.querySelectorAll<HTMLElement>('.meme')];
+function filter(){
+ const q=search.value.trim().toLowerCase(); let count=0;
+ for(const card of cards){const tags:string[]=JSON.parse(card.dataset.tags||'[]'); const show=(card.dataset.caption||'').includes(q)&&(!tag.value||tags.includes(tag.value))&&(!manager.value||card.dataset.manager===manager.value);card.hidden=!show;if(show)count++;}
+ document.querySelector('#results')!.textContent=`Showing ${count} of ${cards.length} demo memes`;
+ (document.querySelector('#empty-results') as HTMLElement).hidden=count!==0;
+}
+search.addEventListener('input',filter);tag.addEventListener('change',filter);manager.addEventListener('change',filter);
+document.querySelector('#clear-filters')!.addEventListener('click',()=>{search.value='';tag.value='';manager.value='';filter();search.focus();});
+</script>

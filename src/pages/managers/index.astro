@@ -1,0 +1,6 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import data from '../../data/clubhouse.json';
+const base = import.meta.env.BASE_URL;
+---
+<Layout title="Managers" active="managers"><div class="eyebrow">THE FRONT OFFICE / SAMPLE PROFILES</div><h1>Meet the management.</h1><p class="muted">No invented trophies. No biographies written on somebody else's behalf. These demo profiles show the layout until managers approve their own details.</p><div class="two-col">{data.managers.map(m=><article class="profile-card"><div class="avatar" aria-hidden="true">{m.initials}</div><span class="eyebrow">SAMPLE IDENTITY</span><h2>{m.alias}</h2><p><strong>{m.team}</strong></p><p class="muted">{m.bio}</p><a class="btn" href={`${base}managers/${m.slug}/`}>View sample profile →</a></article>)}</div></Layout>
