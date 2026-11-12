@@ -1,9 +1,10 @@
 # Redlands Possum Busters
-Public demo source and the manual read-only ESPN access-check workflow are approved for https://github.com/Cheloco44/fantasy-family.git. Bootstrap main only if the remote is still empty; no force pushes. No Pages deployment, scheduled runs, actual league-data publication, or paid services are authorized.
-2026-27 ESPN NHL league 1399646897, ESPN season year 2027. Head-to-head subtype unverified.
-Arizona recap boundary: America/Phoenix. Scheduled target 05:00 local / 12:00 UTC, not enabled.
-The public source at main still has demo profiles. The new eight manager/team mappings and character references supplied by Marcelo are LOCAL CONTENT REVIEW only until approved; do not push them or image assets yet. Biographies, favorite NHL teams, accomplishments, scouting reports and ESPN team IDs are not supplied. Existing recap and meme content remains explicitly DEMO, not actual league results.
-Never call demo data live or count the first milestone complete before authorized scoring/lineup retrieval is exercised.
-No browser requests to ESPN, no credentials in source/build/logs, no raw member payload storage.
-No deployment or public resources without Marcelo's approval of exact content and target.
-Every code change: separate senior review, then security review for auth/data/storage/sync, then local isolated QA. No gym production interactions.
+
+Marcelo approved launching the public clubhouse at https://cheloco44.github.io/fantasy-family/ using https://github.com/Cheloco44/fantasy-family.git.
+Approved launch content: eight supplied manager/team labels, eight portraits cropped from the explicitly labeled contact sheet, original generic demo memes, and clearly marked sample/unavailable results. No permission to publish the entire vault image collection or new real league datasets. No paid services.
+Use manual-only Pages deployment workflow on main. Do not enable recurring ESPN refreshes or automatic deployments without approval. Normal reviewed fast-forward source pushes for this approved launch are permitted; never force-push or change repo visibility/settings.
+2026-27 ESPN NHL league1399646897, ESPN season year2027. Head-to-head subtype and historical lineups remain unverified. Settings access succeeded in a reviewed Actions probe, not a live results import.
+Recap target 05:00 America/Phoenix; scheduling remains disabled.
+Preserve supplied display labels. No invented bios/favorite teams/accomplishments/scouting reports/ESPN IDs. Use explicit user image labels, never face recognition. Keep original assets and private reference manifests out of source and site artifacts. Publish only optimized approved derivatives under public/avatars/.
+No browser calls to ESPN. No credentials in frontend, logs, artifacts, history or public output. Pages workflow never receives ESPN cookies; access probe remains separate and read-only.
+Every code change receives separate senior review, security review for auth/data/storage/sync/deployment, and isolated local QA. Verify exact remote revision, deployment run and public URL before claiming live. No gym app interactions.

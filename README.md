@@ -1,93 +1,70 @@
 # Redlands Possum Busters
 
-An Astro clubhouse demo for the 2026–27 Redlands Possum Busters ESPN Fantasy NHL league. Marcelo approved publishing this demo source and a manual read-only access-check workflow to `Cheloco44/fantasy-family`. **No website deployment, daily schedule, or actual league-data publication is approved or enabled.**
+A lightweight Astro clubhouse for the 2026–27 family ESPN Fantasy NHL league. Public launch approved by Marcelo at `https://cheloco44.github.io/fantasy-family/`. A successful deployment and URL read-back are required before calling it live.
 
-## Actual status
+## What's implemented
 
-- Local content-review update: eight owner-supplied manager/team pairs and character references now replace the two demo identities. These changes are not pushed or approved for public release yet. Bios, images, favorite NHL teams, scouting reports and ESPN team-ID mappings remain pending.
-- Working: static dashboard, profile routes, sample recap/archive, three original demo meme images (unassigned to real managers), combined tag/manager/text filters, mobile navigation, explicit not-connected status.
-- Verified: the unauthenticated league settings request returned HTTP 401. This is an access blocker, not an empty league.
-- Not working yet: actual league retrieval; scoring subtype/settings; historical rosters; real daily recaps; automated updates; stat correction handling; persistent last-good datasets. The access probe is not a completed adapter.
-- No manager details, real NHL results, league standings, biographies, championships or quotes are fabricated. No accounts, uploads, paid AI, external frontend scripts or tracking.
+- Thirteen static routes: dashboard, eight individual manager profiles, manager directory, meme locker, recap archive and sample recap.
+- Eight owner-supplied team/manager labels and explicitly labeled portraits. Optimized 400×400 WebP derivatives, no image EXIF. Original contact sheet and reference manifest stay ignored under `private/`.
+- Three original generic demo memes, combined caption/tag/manager filters, honest empty states and reset. No generic demo meme is attributed to an actual manager.
+- Mobile navigation, explicit results-unavailable status, and no external frontend tracking resources.
+- Read-only ESPN settings probe and separate manual-only GitHub Actions access check. Authenticated settings access was verified on run43227217052; this does not establish scoring or historical-lineup correctness.
 
-## Local setup
+## What's NOT implemented
 
-Use a Node version satisfying `package.json`'s pinned Astro dependency. The initial build was exercised with Node 26.12.1 and npm 12.0.2. Python scripts use only the standard library.
+Actual scoring subtype/settings interpretation, ESPN team-ID mapping, historical active/bench attribution, accurate daily recaps, live standings, correction replay, last-good data preservation, and the05:00 America/Phoenix refresh remain unimplemented/unverified. Sample recaps are not real results. Biographies, favorite NHL teams, achievements and approved scouting reports remain empty.
+
+## Run locally
+
+Node26 and npm are used by the launch workflow; Astro is pinned in package-lock.json. Python tools use the standard library.
 
 ```sh
 npm ci --ignore-scripts
 ASTRO_TELEMETRY_DISABLED=1 npm run build
 npm test
-python -m unittest discover -s scripts -p 'test_*.py' -v
+python3 -m unittest discover -s scripts -p 'test_*.py' -v
 npm run dev
 ```
 
-The development URL is printed by Astro and binds to 127.0.0.1 only. For an already-built preview:
+The dev server binds to127.0.0.1 only. `npm run preview` serves the static build. For a build matching Pages:
 
 ```sh
-python -m http.server 4173 --bind 127.0.0.1 --directory dist
+BASE_PATH=/fantasy-family/ ASTRO_TELEMETRY_DISABLED=1 npm run build
+npm test
 ```
 
-On your PC, tunnel to the VPS without opening a public port:
+## Publish the approved site
 
-```sh
-ssh -L 4173:127.0.0.1:4173 marcelo@YOUR_VPS_HOST
-```
+Pages must be enabled by the owner with **Settings → Pages → Source: GitHub Actions**. No personal-token Pages administration permission is needed when the owner configures it directly.
 
-Then open http://localhost:4173 on that PC. Replace YOUR_VPS_HOST locally; do not send server credentials in Discord. This is a local preview URL, not a publicly accessible link.
+After reviewed source is fast-forwarded to main, run **Actions → Deploy public clubhouse → Run workflow → main**. The workflow is manual-only, pins all actions to full verified commit hashes, builds with `/fantasy-family/`, runs tests and uploads only `dist/`. Only the deploy job gets `pages: write` and `id-token: write`; the build gets no ESPN credentials. No push trigger or daily schedule is enabled.
 
-## Edit approved content
+Verify the exact run head SHA, all jobs and the public site before saying deployment succeeded. URL: https://cheloco44.github.io/fantasy-family/ . This is public; noindex is not privacy or authentication. No paid service has been approved.
 
-`src/data/clubhouse.json` is the single starter content file. Manager labels and character references in the local preview are owner-supplied; all actual results, recaps and artwork remain demo or unavailable. Do not remove the demo-data banner or publish new profile records before explicit content approval. The vault folder named "nhl fantasy images" was not present in the VPS copy when checked; wait for sync or an exact path rather than inventing image matches.
+## Edit profiles and memes
 
-- Profiles: edit aliases, team name, initials and biography. Only use self-written, explicitly approved bios. Current UI has no real avatar/logo upload or championships editor; those are future content extensions.
-- Memes: put approved static images or GIFs in `public/memes/`; add a metadata record with a unique id, relative image path, caption, contributor nickname, ISO date, manager slug, tags and featured flag. Keep exactly one featured meme. No SVG supplied by untrusted contributors: sanitize/convert it first. Strip image location/EXIF metadata. Use only content you have permission to share.
-- Search matches captions; tags and manager filters combine. Reset restores all content. The gallery still displays without JavaScript.
-- No HTML in text fields; Astro escapes text. Local source editors are trusted administrators, not anonymous uploads. Validate image paths and do not embed external tracking resources.
+`src/data/clubhouse.json` is the content source. Preserve supplied display names/team names unless corrected by the owner. Profile `approved` is an editorial record, not a security boundary. Do not invent bios, awards, favorite teams or quotes.
 
-Optional manager avatar/logo, favorite team, approved scouting report, championships, rivalries and league moments should be added only from approved submissions. Nothing about real managers is assumed. Existing placeholder fields intentionally say not supplied.
+- Portraits: place only approved, metadata-stripped derivatives under `public/avatars/` and update the record's relative `image` path. Do not upload original photos/contact sheets/private manifests.
+- Biographies: accept self-written approved text; Astro escapes text, so don't add raw HTML sinks.
+- Memes: add approved static PNG/JPG/WebP/GIF files to `public/memes/`, with unique id, caption, contributor nickname, ISO date, tags, optional manager slug and exactly one featured item. Strip EXIF and confirm rights/consent. Untrusted SVG files must be sanitized or converted; current SVG artwork was authored locally.
+- Search matches captions; tag and manager filters combine. `manager: null` means unassigned, not an implied person. The gallery works without JavaScript, though filtering needs it.
+- Keep headshots, character references and memes distinct. Receiving an image isn't approval to publish the whole collection. The47-image vault folder is not copied into this repo.
 
-## ESPN access
+## ESPN setup and next gates
 
-Read `docs/ESPN-SETUP.md` for the private terminal probe and manually dispatched GitHub Actions access check. Never paste cookies in chat. No `PUBLIC_` credential variables, cookies in config, `.env` files in commits, raw ESPN records in `public/`, or secrets in Actions logs/artifacts. Session cookies may be account-wide even though our client only sends GET requests.
+See `docs/ESPN-SETUP.md`. Never paste cookies in chat or put them in files/history/build outputs. Session cookies may grant account-wide access even though the client performs only a fixed GET. Use Actions secrets only in the separate probe workflow. Never pass them to the public site build.
 
-## Integration contract — not implemented yet
+Before live recaps: validate actual points/category rules, scoring vs matchup periods, historical lineups, date/game mapping and goalie constraints. Compare a completed date against ESPN. Test off-days, postponements, missing results, weighted ratios, correction replay, duplicate-date prevention and failure preservation. Store only approved allowlisted public fields; never ship raw provider payloads or member records.
 
-1. Retrieve settings and prove whether head-to-head uses points or categories. Establish scoring periods and matchup periods; do not conflate them.
-2. Exercise actual historical active/bench assignments and per-game player statistics for the same league-local day. If history is missing, report unavailable and start snapshots only after authorization; never substitute today's roster.
-3. Score via real settings; compare with ESPN. Goalies require appropriate weighted totals and minimum-appearance rules. Category formats cannot be turned into invented fantasy point totals or ranked without an agreed criterion.
-4. Map games to Arizona calendar dates. Distinguish off-days, postponed and incomplete games. Keep recap provisional if any expected results/lineups are missing.
-5. Store private input only where necessary, outside the public site and artifact paths. Publish an explicit allowlist of approved fields, not a raw API payload. Use stable internal manager IDs mapped to separately approved aliases, not ESPN member names.
-6. Before replacing last-good data, validate every required field, scoring rules and completeness. On failure preserve it and record a sanitized failed-attempt status. A stale badge must never imply a failed refresh succeeded.
-7. Key recap records by league + season + Arizona date; corrections replace the same record with revision metadata. Re-fetch a recent correction window. Build content atomically; keep dated archives.
-8. Test live scoring, lineup attribution, category ratios, goalie constraints, boundaries, off-days, missing results, corrections, repeated dates, failure preservation and credential exclusion before declaring live integration done.
+Yesterday must use America/Phoenix calendar boundaries; `src/lib/clock.mjs` covers that small piece. A future daily cron target would be12:00 UTC, but GitHub scheduling can be delayed. Nothing currently refreshes scores automatically.
 
-The small tested `src/lib/clock.mjs` utility implements the Arizona calendar boundary. It is not a scoring engine or scheduled updater.
+## Troubleshooting and rollback
 
-## Scheduling proposal — disabled
+- Blank styles/broken assets: verify BASE_PATH and the exact Pages project URL.
+- Deployment403: check Pages source and the workflow's built-in token permissions; don't print tokens or broaden personal-token access blindly.
+- Results unavailable: expected until real data integration is implemented. The successful access probe is not a results refresh.
+- Failed build/deploy: inspect the exact noncredentialed deployment run. Keep the last published site; do not publish a partial output directory.
+- Rollback after a problematic release: restore a previously reviewed revision via a normal revert commit on main and manually deploy that reviewed revert. Never force-push; never rerun an old release while claiming it contains current changes.
 
-05:00 America/Phoenix corresponds to 12:00 UTC year-round. A future GitHub Actions schedule would use `0 12 * * *` with manual dispatch. GitHub scheduling can be delayed. No daily refresh is installed or scheduled. A manual-only ESPN access-check workflow is included. Use GitHub repository Actions secrets (not variables); never run credentialed jobs for untrusted PR code. Pin actions to verified commit SHAs and keep permissions minimal. Hosting/Actions allowances must be checked before enabling; no paid services without approval.
-
-## Publication instructions — gated
-
-Once Marcelo provides the GitHub repository and approves the exact public content:
-
-1. Configure `site` in `astro.config.mjs` for the approved URL and set `BASE_PATH=/REPO_NAME/` when building a project Pages site (use `/` for a root/custom-domain site).
-2. Run the build and tests under the actual base path; validate internal links, scripts and image URLs.
-3. Senior review, security review and preview QA of the exact revision. Scan source and generated artifacts for credentials, PII, raw league responses and accidental personal files.
-4. Use an approved Pages deployment workflow that uploads **only `dist/`**. Do not upload the whole working directory. No workflow has been installed yet.
-5. Get final deployment approval. Verify the actual remote Pages URL and published content before saying it is live.
-
-GitHub Pages is public for this design. A private repo is not a privacy control for the resulting site. `noindex` discourages indexing during review; it is not authentication. GitHub maintains visitor IP logs. Aliases, photos and league activity can still identify people, so all specific content needs explicit approval.
-
-## Troubleshooting
-
-- Build failure: `npm ci --ignore-scripts`, then rerun build; check supported Node version and JSON syntax.
-- Blank styling or broken assets on Pages: check `BASE_PATH`, trailing slashes and the deployed subpath.
-- Probe HTTP 401/403: stop; authenticate privately and rerun the probe. Do not paste response bodies or credentials into an issue.
-- Probe succeeds: proves settings access only, not scoring/roster history or recap correctness.
-- Stale status today: expected; the preview is not connected. There is no working refresh button pretending to call ESPN.
-
-## Cost and scope
-
-No new paid service, account or repository created. Only demo source and the manual access-check workflow are approved for publication. No transaction, trade or lineup mutation. No modifications to the gym app. A usable sample preview is not the first live-data milestone.
+The gym app is out of scope. No real transactions, trades or lineup mutations are permitted.

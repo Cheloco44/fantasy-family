@@ -18,9 +18,9 @@ test('eight owner-supplied mappings are preserved without fabricated profile det
  for(const m of data.managers){
   assert.equal(m.bio,null);
   assert.equal(m.scoutingReport,null);
-  assert.equal(m.approved,false);
+  assert.equal(m.approved,true);
   assert.equal(m.espnTeamId,null);
-  assert.equal(m.image,null);
+  assert.equal(m.image,`avatars/${m.slug}.webp`);
  }
  assert.ok(data.memes.every(m=>m.manager===null),'Demo memes must not be attributed to actual managers');
 });

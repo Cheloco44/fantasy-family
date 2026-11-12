@@ -16,9 +16,9 @@
       "favoriteTeam": null,
       "bio": null,
       "scoutingReport": null,
-      "approved": false,
+      "approved": true,
       "espnTeamId": null,
-      "image": null
+      "image": "avatars/marcelo.webp"
     },
     {
       "slug": "rich",
@@ -29,9 +29,9 @@
       "favoriteTeam": null,
       "bio": null,
       "scoutingReport": null,
-      "approved": false,
+      "approved": true,
       "espnTeamId": null,
-      "image": null
+      "image": "avatars/rich.webp"
     },
     {
       "slug": "zach",
@@ -42,9 +42,9 @@
       "favoriteTeam": null,
       "bio": null,
       "scoutingReport": null,
-      "approved": false,
+      "approved": true,
       "espnTeamId": null,
-      "image": null
+      "image": "avatars/zach.webp"
     },
     {
       "slug": "ben",
@@ -55,9 +55,9 @@
       "favoriteTeam": null,
       "bio": null,
       "scoutingReport": null,
-      "approved": false,
+      "approved": true,
       "espnTeamId": null,
-      "image": null
+      "image": "avatars/ben.webp"
     },
     {
       "slug": "jake",
@@ -68,9 +68,9 @@
       "favoriteTeam": null,
       "bio": null,
       "scoutingReport": null,
-      "approved": false,
+      "approved": true,
       "espnTeamId": null,
-      "image": null
+      "image": "avatars/jake.webp"
     },
     {
       "slug": "robert",
@@ -81,9 +81,9 @@
       "favoriteTeam": null,
       "bio": null,
       "scoutingReport": null,
-      "approved": false,
+      "approved": true,
       "espnTeamId": null,
-      "image": null
+      "image": "avatars/robert.webp"
     },
     {
       "slug": "erik",
@@ -94,9 +94,9 @@
       "favoriteTeam": null,
       "bio": null,
       "scoutingReport": null,
-      "approved": false,
+      "approved": true,
       "espnTeamId": null,
-      "image": null
+      "image": "avatars/erik.webp"
     },
     {
       "slug": "kyle",
@@ -107,9 +107,9 @@
       "favoriteTeam": null,
       "bio": null,
       "scoutingReport": null,
-      "approved": false,
+      "approved": true,
       "espnTeamId": null,
-      "image": null
+      "image": "avatars/kyle.webp"
     }
   ],
   "memes": [

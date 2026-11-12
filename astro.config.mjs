@@ -1,3 +1,3 @@
 import { defineConfig } from 'astro/config';
-// Public deployment is deliberately not configured. Set BASE_PATH for Pages later.
-export default defineConfig({ output: 'static', base: process.env.BASE_PATH || '/', trailingSlash: 'always' });
+// Keep local builds at root; the Pages workflow sets BASE_PATH=/fantasy-family/.
+export default defineConfig({ output: 'static', site: 'https://cheloco44.github.io', base: process.env.BASE_PATH || '/', trailingSlash: 'always' });

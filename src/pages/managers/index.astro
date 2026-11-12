@@ -4,16 +4,15 @@ import data from '../../data/clubhouse.json';
 const base = import.meta.env.BASE_URL;
 ---
 <Layout title="Managers" active="managers">
-  <div class="eyebrow">THE FRONT OFFICE / OWNER-SUPPLIED ROSTER</div>
+  <div class="eyebrow">THE FRONT OFFICE</div>
   <h1>Eight managers.<br/>Plenty of material.</h1>
-  <p class="muted">Team and manager labels supplied by Marcelo. Character references are ready; images and self-written bios are still pending. This version is for local content review, not public release.</p>
+  <p class="muted">Big personalities. Questionable lineup decisions. Manager and team labels supplied by the league owner; the biographies are theirs to write.</p>
   <div class="two-col">
     {data.managers.map(m => <article class="profile-card">
-      <div class="avatar" aria-hidden="true">{m.initials}</div>
-      <span class="eyebrow">OWNER-SUPPLIED / PUBLICATION PENDING</span>
+      <img class="profile-portrait" src={`${base}${m.image}`} alt={`${m.alias} — owner-labeled portrait`} width="400" height="400" loading="lazy" />
+      <span class="eyebrow">THE MANAGEMENT</span>
       <h2>{m.alias}</h2>
       <p><strong>{m.team}</strong></p>
-      <p class="small muted">Character reference: {m.characterDescription}</p>
       <p class="muted">{m.bio || 'Bio pending. The manager gets to write their own origin story.'}</p>
       <a class="btn" href={`${base}managers/${m.slug}/`}>View profile →</a>
     </article>)}
