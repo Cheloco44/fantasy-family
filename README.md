@@ -4,10 +4,11 @@ An Astro clubhouse demo for the 2026–27 Redlands Possum Busters ESPN Fantasy N
 
 ## Actual status
 
-- Working: static dashboard, two explicitly sample manager profiles, sample recap/archive, three original demo meme images, combined tag/manager/text filters, mobile navigation, explicit not-connected status.
+- Local content-review update: eight owner-supplied manager/team pairs and character references now replace the two demo identities. These changes are not pushed or approved for public release yet. Bios, images, favorite NHL teams, scouting reports and ESPN team-ID mappings remain pending.
+- Working: static dashboard, profile routes, sample recap/archive, three original demo meme images (unassigned to real managers), combined tag/manager/text filters, mobile navigation, explicit not-connected status.
 - Verified: the unauthenticated league settings request returned HTTP 401. This is an access blocker, not an empty league.
 - Not working yet: actual league retrieval; scoring subtype/settings; historical rosters; real daily recaps; automated updates; stat correction handling; persistent last-good datasets. The access probe is not a completed adapter.
-- No real manager details, real NHL results, league standings, biographies, championships or quotes are fabricated. No accounts, uploads, paid AI, external frontend scripts or tracking.
+- No manager details, real NHL results, league standings, biographies, championships or quotes are fabricated. No accounts, uploads, paid AI, external frontend scripts or tracking.
 
 ## Local setup
 
@@ -37,7 +38,7 @@ Then open http://localhost:4173 on that PC. Replace YOUR_VPS_HOST locally; do no
 
 ## Edit approved content
 
-`src/data/clubhouse.json` is the single starter content file. All records are demo data and the app deliberately remains labeled demo. Do not remove the banner to imply a working integration.
+`src/data/clubhouse.json` is the single starter content file. Manager labels and character references in the local preview are owner-supplied; all actual results, recaps and artwork remain demo or unavailable. Do not remove the demo-data banner or publish new profile records before explicit content approval. The vault folder named "nhl fantasy images" was not present in the VPS copy when checked; wait for sync or an exact path rather than inventing image matches.
 
 - Profiles: edit aliases, team name, initials and biography. Only use self-written, explicitly approved bios. Current UI has no real avatar/logo upload or championships editor; those are future content extensions.
 - Memes: put approved static images or GIFs in `public/memes/`; add a metadata record with a unique id, relative image path, caption, contributor nickname, ISO date, manager slug, tags and featured flag. Keep exactly one featured meme. No SVG supplied by untrusted contributors: sanitize/convert it first. Strip image location/EXIF metadata. Use only content you have permission to share.

@@ -1,6 +1,6 @@
 {
   "league": "Redlands Possum Busters",
-  "season": "2026\u201327",
+  "season": "2026–27",
   "leagueId": "1399646897",
   "timezone": "America/Phoenix",
   "refreshTime": "05:00",
@@ -8,26 +8,108 @@
   "lastSuccessfulUpdate": null,
   "managers": [
     {
-      "slug": "demo-a",
-      "alias": "Demo Manager A",
-      "team": "Bench Warmers (demo)",
-      "initials": "DA",
-      "accent": "orange",
-      "favoriteTeam": "Not supplied",
-      "bio": "Sample profile only. Replace this with a manager-approved, self-written biography.",
+      "slug": "marcelo",
+      "alias": "Marcelo",
+      "team": "Americas fupa",
+      "initials": "MA",
+      "characterDescription": "big guy strongman",
+      "favoriteTeam": null,
+      "bio": null,
       "scoutingReport": null,
-      "approved": false
+      "approved": false,
+      "espnTeamId": null,
+      "image": null
     },
     {
-      "slug": "demo-b",
-      "alias": "Demo Manager B",
-      "team": "Puck Around (demo)",
-      "initials": "DB",
-      "accent": "blue",
-      "favoriteTeam": "Not supplied",
-      "bio": "Sample profile only. Your actual alias, team identity, and biography will go here after approval.",
+      "slug": "rich",
+      "alias": "rich",
+      "team": "district 9",
+      "initials": "RI",
+      "characterDescription": "old monkey or old man",
+      "favoriteTeam": null,
+      "bio": null,
       "scoutingReport": null,
-      "approved": false
+      "approved": false,
+      "espnTeamId": null,
+      "image": null
+    },
+    {
+      "slug": "zach",
+      "alias": "zach",
+      "team": "junes half baked qaks",
+      "initials": "ZA",
+      "characterDescription": "half human half bug",
+      "favoriteTeam": null,
+      "bio": null,
+      "scoutingReport": null,
+      "approved": false,
+      "espnTeamId": null,
+      "image": null
+    },
+    {
+      "slug": "ben",
+      "alias": "ben",
+      "team": "good squad",
+      "initials": "BE",
+      "characterDescription": "blue hair guy with skinny legs",
+      "favoriteTeam": null,
+      "bio": null,
+      "scoutingReport": null,
+      "approved": false,
+      "espnTeamId": null,
+      "image": null
+    },
+    {
+      "slug": "jake",
+      "alias": "jake",
+      "team": "can nikgar",
+      "initials": "JA",
+      "characterDescription": "caveman; has many different faces",
+      "favoriteTeam": null,
+      "bio": null,
+      "scoutingReport": null,
+      "approved": false,
+      "espnTeamId": null,
+      "image": null
+    },
+    {
+      "slug": "robert",
+      "alias": "robert",
+      "team": "anti chel warriors",
+      "initials": "RO",
+      "characterDescription": "older guy in a dodgers hat",
+      "favoriteTeam": null,
+      "bio": null,
+      "scoutingReport": null,
+      "approved": false,
+      "espnTeamId": null,
+      "image": null
+    },
+    {
+      "slug": "erik",
+      "alias": "ERIK",
+      "team": "pash patels",
+      "initials": "ER",
+      "characterDescription": "robot",
+      "favoriteTeam": null,
+      "bio": null,
+      "scoutingReport": null,
+      "approved": false,
+      "espnTeamId": null,
+      "image": null
+    },
+    {
+      "slug": "kyle",
+      "alias": "kyle",
+      "team": "Team Jive turkey",
+      "initials": "KY",
+      "characterDescription": "young monkey or young guy in a jester hat",
+      "favoriteTeam": null,
+      "bio": null,
+      "scoutingReport": null,
+      "approved": false,
+      "espnTeamId": null,
+      "image": null
     }
   ],
   "memes": [
@@ -35,39 +117,39 @@
       "id": "bench",
       "image": "memes/bench.svg",
       "caption": "The bench has requested a performance bonus.",
-      "contributor": "Neo \u00b7 demo artwork",
+      "contributor": "Neo · demo artwork",
       "date": "2026-11-11",
       "tags": [
         "bench",
         "2026-27"
       ],
-      "manager": "demo-a",
+      "manager": null,
       "featured": true
     },
     {
       "id": "goalie",
       "image": "memes/goalie.svg",
       "caption": "Goaltending: where confidence goes to get pulled.",
-      "contributor": "Neo \u00b7 demo artwork",
+      "contributor": "Neo · demo artwork",
       "date": "2026-11-11",
       "tags": [
         "goalies",
         "2026-27"
       ],
-      "manager": "demo-b",
+      "manager": null,
       "featured": false
     },
     {
       "id": "waivers",
       "image": "memes/waivers.svg",
       "caption": "This waiver claim will fix everything. Again.",
-      "contributor": "Neo \u00b7 demo artwork",
+      "contributor": "Neo · demo artwork",
       "date": "2026-11-11",
       "tags": [
         "waivers",
         "2026-27"
       ],
-      "manager": "demo-a",
+      "manager": null,
       "featured": false
     }
   ]

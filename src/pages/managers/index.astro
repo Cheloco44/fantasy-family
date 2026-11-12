@@ -3,4 +3,19 @@ import Layout from '../../layouts/Layout.astro';
 import data from '../../data/clubhouse.json';
 const base = import.meta.env.BASE_URL;
 ---
-<Layout title="Managers" active="managers"><div class="eyebrow">THE FRONT OFFICE / SAMPLE PROFILES</div><h1>Meet the management.</h1><p class="muted">No invented trophies. No biographies written on somebody else's behalf. These demo profiles show the layout until managers approve their own details.</p><div class="two-col">{data.managers.map(m=><article class="profile-card"><div class="avatar" aria-hidden="true">{m.initials}</div><span class="eyebrow">SAMPLE IDENTITY</span><h2>{m.alias}</h2><p><strong>{m.team}</strong></p><p class="muted">{m.bio}</p><a class="btn" href={`${base}managers/${m.slug}/`}>View sample profile →</a></article>)}</div></Layout>
+<Layout title="Managers" active="managers">
+  <div class="eyebrow">THE FRONT OFFICE / OWNER-SUPPLIED ROSTER</div>
+  <h1>Eight managers.<br/>Plenty of material.</h1>
+  <p class="muted">Team and manager labels supplied by Marcelo. Character references are ready; images and self-written bios are still pending. This version is for local content review, not public release.</p>
+  <div class="two-col">
+    {data.managers.map(m => <article class="profile-card">
+      <div class="avatar" aria-hidden="true">{m.initials}</div>
+      <span class="eyebrow">OWNER-SUPPLIED / PUBLICATION PENDING</span>
+      <h2>{m.alias}</h2>
+      <p><strong>{m.team}</strong></p>
+      <p class="small muted">Character reference: {m.characterDescription}</p>
+      <p class="muted">{m.bio || 'Bio pending. The manager gets to write their own origin story.'}</p>
+      <a class="btn" href={`${base}managers/${m.slug}/`}>View profile →</a>
+    </article>)}
+  </div>
+</Layout>

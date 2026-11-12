@@ -2,8 +2,10 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 
+const managers = JSON.parse(readFileSync('src/data/clubhouse.json', 'utf8')).managers;
+
 test('profiles, archive and filterable meme gallery build as real routes', () => {
-  for (const path of ['managers/index.html', 'managers/demo-a/index.html', 'managers/demo-b/index.html', 'memes/index.html', 'recaps/index.html', 'recaps/sample/index.html']) {
+  for (const path of ['managers/index.html', ...managers.map(m => `managers/${m.slug}/index.html`), 'memes/index.html', 'recaps/index.html', 'recaps/sample/index.html']) {
     assert.ok(existsSync(`dist/${path}`), path);
     assert.ok(readFileSync(`dist/${path}`, 'utf8').includes('DEMO DATA'), path);
   }

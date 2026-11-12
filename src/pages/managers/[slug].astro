@@ -1,8 +1,27 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import data from '../../data/clubhouse.json';
-export function getStaticPaths(){return data.managers.map(manager=>({params:{slug:manager.slug},props:{manager}}));}
-const {manager:m}=Astro.props;
-const base=import.meta.env.BASE_URL;
+export function getStaticPaths() {
+  return data.managers.map(manager => ({ params: { slug: manager.slug }, props: { manager } }));
+}
+const { manager: m } = Astro.props;
+const base = import.meta.env.BASE_URL;
 ---
-<Layout title={m.alias} active="managers"><article class="profile-detail"><a href={`${base}managers/`} class="small">← All managers</a><div class="avatar large" aria-hidden="true" style="margin-top:25px">{m.initials}</div><div class="eyebrow">SAMPLE PROFILE / NOT A REAL MANAGER</div><h1>{m.alias}</h1><h2>{m.team}</h2><dl class="definition"><dt>Favorite NHL team</dt><dd>{m.favoriteTeam}</dd><dt>Biography</dt><dd>{m.bio}</dd><dt>Championships, rivalries & moments</dt><dd>Not supplied. Nothing assumed.</dd><dt>Scouting report</dt><dd>No manager-approved scouting report yet.</dd></dl><p class="muted">Managers can supply an alias, team identity, approved image, and their own short bio. Publishing those details requires their approval.</p></article></Layout>
+<Layout title={m.alias} active="managers">
+  <article class="profile-detail">
+    <a href={`${base}managers/`} class="small">← All managers</a>
+    <div class="avatar large" aria-hidden="true" style="margin-top:25px">{m.initials}</div>
+    <div class="eyebrow">OWNER-SUPPLIED PROFILE / LOCAL CONTENT REVIEW</div>
+    <h1>{m.alias}</h1>
+    <h2>{m.team}</h2>
+    <dl class="definition">
+      <dt>Character reference supplied by Marcelo</dt><dd>{m.characterDescription}</dd>
+      <dt>Avatar / team image</dt><dd>Awaiting the image folder and an approved selection.</dd>
+      <dt>Favorite NHL team</dt><dd>{m.favoriteTeam || 'Not supplied.'}</dd>
+      <dt>Biography</dt><dd>{m.bio || 'Not supplied. The manager writes this one.'}</dd>
+      <dt>Championships, rivalries & moments</dt><dd>Not supplied. No imaginary trophy cabinet.</dd>
+      <dt>Scouting report</dt><dd>{m.scoutingReport || 'No manager-approved scouting report yet.'}</dd>
+    </dl>
+    <p class="muted">These names and team labels are owner-supplied, not matched to ESPN IDs yet. No actual player stats, lineup decisions, accomplishments, or quotes are attributed to this manager.</p>
+  </article>
+</Layout>
