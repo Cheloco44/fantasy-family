@@ -174,6 +174,8 @@ class TransportTests(unittest.TestCase):
         prefix = 'SAFE_LOOKUP_DIAGNOSTIC '
         diagnostic = json.loads(next(line[len(prefix):] for line in err.splitlines() if line.startswith(prefix)))
         self.assertEqual(diagnostic['stage'], 'league-normalization')
+        self.assertTrue(diagnostic['sourceLines'])
+        self.assertTrue(all(type(line) is int and 0 < line < 10000 for line in diagnostic['sourceLines']))
         self.assertEqual(diagnostic['summary']['responseScoringPeriod'], 45)
         self.assertEqual(diagnostic['summary']['nullDailyMapCount'], 1)
         self.assertEqual(diagnostic['summary']['targetDailySideCount'], 7)

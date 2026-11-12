@@ -220,6 +220,16 @@ def main(argv=None, *, environ=None, opener_factory=build_opener, now=None):
         print('ERROR lookup failed.', file=sys.stderr)
         if args.diagnostic and valid_cookies:
             diagnostic = dict(stage=stage, summary=summary)
+            # Only our public script's integer line numbers, never a traceback,
+            # exception message, provider value, path, frame locals or source text.
+            if stage == 'league-normalization' and error.__context__ is not None:
+                frame = error.__context__.__traceback__
+                lines = []
+                while frame is not None:
+                    if frame.tb_frame.f_code.co_filename == __file__ and 0 < frame.tb_lineno < 10000:
+                        lines.append(frame.tb_lineno)
+                    frame = frame.tb_next
+                diagnostic['sourceLines'] = lines
             code = getattr(error, 'code', None)
             if type(code) is int and 100 <= code <= 599:
                 diagnostic['httpStatus'] = code
