@@ -20,7 +20,7 @@ gh workflow run lookup-daily.yml --repo Cheloco44/fantasy-family --ref main
 gh run list --repo Cheloco44/fantasy-family --workflow lookup-daily.yml --branch main --event workflow_dispatch --limit 5 --json databaseId,headSha,status,conclusion,url
 ```
 
-Select the run matching the reviewed source commit and inspect its job/step status. Do not print raw credentialed-job logs. Download only its `nov-11-daily-scores` artifact:
+Select the run matching the reviewed source commit and inspect its job/step status. Do not print raw credentialed-job logs. The workflow enables opt-in `--diagnostic`: on failure it may emit one `SAFE_LOOKUP_DIAGNOSTIC` JSON line containing only a fixed stage, HTTP status, period ID, counts, fixed type labels, and identity/scoring-match booleans. No team names, scores, raw fields or exception text enter that diagnostic. A credential-collision check also covers this line. Extract only this prefix in-process; never display the full job log. Download only its `nov-11-daily-scores` artifact:
 
 ```bash
 gh run download RUN_ID --repo Cheloco44/fantasy-family --name nov-11-daily-scores --dir artifacts/nov-11-RUN_ID

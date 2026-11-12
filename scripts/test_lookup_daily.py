@@ -152,6 +152,25 @@ class TransportTests(unittest.TestCase):
                                opener_factory=factory, now=NOW)
         return code, out.getvalue(), err.getvalue(), calls, handlers
 
+    def test_safe_optin_diagnostics_expose_only_types_counts_and_stage(self):
+        data = league(); data['scoringPeriodId'] = 45
+        data['schedule'][0]['home']['pointsByScoringPeriod'] = None
+        data['members'] = [{'email': 'private-person@example.invalid'}]
+        code, out, err, _, _ = self.invoke(['--network', '--diagnostic'], [Response(metadata()), Response(data)])
+        self.assertEqual((code, out), (1, ''))
+        prefix = 'SAFE_LOOKUP_DIAGNOSTIC '
+        diagnostic = json.loads(next(line[len(prefix):] for line in err.splitlines() if line.startswith(prefix)))
+        self.assertEqual(diagnostic['stage'], 'league-normalization')
+        self.assertEqual(diagnostic['summary']['responseScoringPeriod'], 45)
+        self.assertEqual(diagnostic['summary']['nullDailyMapCount'], 1)
+        self.assertEqual(diagnostic['summary']['targetDailySideCount'], 7)
+        self.assertEqual(set(diagnostic['summary']), {'responseScoringPeriod', 'teamCount', 'leagueMatches', 'seasonMatches', 'pointsScoring', 'nullDailyMapCount', 'targetDailySideCount', 'targetDailyValueTypes'})
+        for private in ('private-person', 'Canonical', 'members', 'email', 'synthetic-s2-token', '{synthetic-swid}'):
+            self.assertNotIn(private, err)
+        code, _, err, _, _ = self.invoke(['--network', '--diagnostic'], [Response(metadata()), Response(data)], environ=dict(self.cookies, ESPN_S2='45'))
+        self.assertEqual(code, 1)
+        self.assertNotIn(prefix, err)
+
     def test_fixed_gets_metadata_never_authenticated_and_bounded(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'result.json'
@@ -256,7 +275,7 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn('retention-days: 1\n', text)
         self.assertIn('if-no-files-found: error\n', text)
         self.assertIn("python -m unittest discover -s scripts -p 'test_*.py'", text)
-        self.assertIn('python scripts/lookup_daily.py --network', text)
+        self.assertIn('python scripts/lookup_daily.py --network --diagnostic', text)
         self.assertIn('set +x\n          ulimit -c 0\n', text)
         self.assertEqual(text.count('secrets.'), 2)
         self.assertIn('ESPN_S2: ${{ secrets.ESPN_S2 }}', text)

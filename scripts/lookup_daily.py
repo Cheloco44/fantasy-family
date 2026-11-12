@@ -141,14 +141,43 @@ def _normalize(data, metadata, *, now):
                 teams=[sides[team_id] for team_id in sorted(sides)])
 
 
+def diagnostic_summary(data):
+    """Only counts, fixed type labels and approved period metadata."""
+    data = data if type(data) is dict else {}
+    period, teams, settings = data.get('scoringPeriodId'), data.get('teams'), data.get('settings')
+    scoring = settings.get('scoringSettings', {}) if type(settings) is dict else {}
+    kinds, nulls = [], 0
+    schedule = data.get('schedule')
+    for match in schedule if type(schedule) is list else []:
+        if type(match) is not dict:
+            continue
+        for key in ('home', 'away'):
+            side = match.get(key)
+            if type(side) is not dict:
+                continue
+            points = side.get('pointsByScoringPeriod')
+            nulls += points is None
+            if type(points) is dict and '44' in points:
+                value = points['44']
+                kinds.append('number' if type(value) in (int, float) else
+                             'null' if value is None else 'other')
+    return dict(responseScoringPeriod=period if type(period) is int and 0 < period < 1000 else None,
+                teamCount=len(teams) if type(teams) is list else None,
+                leagueMatches=data.get('id') == LEAGUE_ID, seasonMatches=data.get('seasonId') == SEASON_ID,
+                pointsScoring=type(scoring) is dict and scoring.get('scoringType') == 'H2H_POINTS',
+                nullDailyMapCount=nulls, targetDailySideCount=len(kinds), targetDailyValueTypes=sorted(set(kinds)))
+
+
 def main(argv=None, *, environ=None, opener_factory=build_opener, now=None):
     parser = SafeArgumentParser(description=__doc__)
     parser.add_argument('--network', action='store_true')
+    parser.add_argument('--diagnostic', action='store_true')
     parser.add_argument('--output', default='artifacts/daily-lookup/nov-11.json')
     args = parser.parse_args(argv)
     if not args.network:
         print('ERROR network disabled; pass --network.', file=sys.stderr)
         return 2
+    stage, summary, valid_cookies = 'credentials', None, False
     try:
         environ = os.environ if environ is None else environ
         cookies = [environ.get('ESPN_S2'), environ.get('ESPN_SWID')]
@@ -156,8 +185,10 @@ def main(argv=None, *, environ=None, opener_factory=build_opener, now=None):
                 ord(c) < 33 or ord(c) > 126 or c in ';,"\\' for c in value)
                for value in cookies):
             raise ValueError
+        valid_cookies = True
         payloads = []
         for url in (METADATA_URL, LEAGUE_URL):
+            stage = 'metadata-transport' if url == METADATA_URL else 'league-transport'
             headers = {} if url == METADATA_URL else {'Cookie': f'espn_s2={cookies[0]}; SWID={cookies[1]}'}
             # Default stdlib TLS certificate and hostname checks stay enabled.
             with opener_factory(NoRedirect()).open(Request(url, method='GET', headers=headers), timeout=20) as response:
@@ -166,17 +197,31 @@ def main(argv=None, *, environ=None, opener_factory=build_opener, now=None):
                 body = response.read(MAX_BYTES + 1)
                 if len(body) > MAX_BYTES:
                     raise ValueError
+                stage = 'metadata-response' if url == METADATA_URL else 'league-response'
                 payloads.append(json.loads(body))
             if url == METADATA_URL:
+                stage = 'metadata-date'
                 period_evidence(payloads[0])  # No authenticated GET until date evidence is valid.
+        stage = 'league-normalization'
+        summary = diagnostic_summary(payloads[1])
         result = normalize(payloads[1], payloads[0], now=now)
+        stage = 'serialization'
         text = json.dumps(result, ensure_ascii=False, allow_nan=False, separators=(',', ':')) + '\n'
         if any(cookie in text for cookie in cookies):
             raise ValueError
+        stage = 'write'
         atomic_write(args.output, text)
-    except Exception:
+    except Exception as error:
         # Never echo bodies, headers, paths, cookies, or provider exception details.
         print('ERROR lookup failed.', file=sys.stderr)
+        if args.diagnostic and valid_cookies:
+            diagnostic = dict(stage=stage, summary=summary)
+            code = getattr(error, 'code', None)
+            if type(code) is int and 100 <= code <= 599:
+                diagnostic['httpStatus'] = code
+            safe_text = json.dumps(diagnostic, allow_nan=False, separators=(',', ':'))
+            if not any(cookie in safe_text for cookie in cookies):
+                print('SAFE_LOOKUP_DIAGNOSTIC ' + safe_text, file=sys.stderr)
         return 1
     print(f"OK teams={len(result['teams'])} available={sum(t['available'] for t in result['teams'])} scoringPeriodId=44")
     return 0
