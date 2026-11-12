@@ -112,9 +112,12 @@ def _normalize(data, metadata, *, now):
                 integer(value)
             if PERIOD in periods:
                 mapped.add(period)
-        if len(mapped) != 1 or (candidates and candidates != mapped):
-            raise ValueError
-        candidates = mapped
+        if not candidates:
+            if len(mapped) != 1:
+                raise ValueError
+            candidates = mapped
+        # Explicit date-keyed score entries outrank configured week groupings.
+        # A unique candidate and complete team coverage are still required below.
     if len(candidates) != 1:
         raise ValueError
     period = candidates.pop()

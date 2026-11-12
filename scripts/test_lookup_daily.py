@@ -69,6 +69,21 @@ class NormalizeTests(unittest.TestCase):
         self.assertIsNone(result[2]['pointSource'])
         self.assertNotIn('providerPrivate', json.dumps(result))
 
+    def test_explicit_daily_entries_take_priority_over_configured_week_map(self):
+        for mapping in ({'7': [44]}, {'7': [45]}, {'6': [44], '7': [44]}):
+            data = league(); data['settings']['scheduleSettings']['matchupPeriods'] = mapping
+            with self.subTest(mapping=mapping):
+                result = lookup.normalize(data, metadata(), now=NOW)
+                self.assertEqual(result['matchupPeriodId'], 6)
+                self.assertTrue(all(t['dailyPoints'] == 10 for t in result['teams']))
+        data = league()
+        for match in data['schedule']:
+            for side in (match['home'], match['away']):
+                side.pop('pointsByScoringPeriod')
+        data['settings']['scheduleSettings']['matchupPeriods'] = {'6': [44], '7': [44]}
+        with self.assertRaises(ValueError):
+            lookup.normalize(data, metadata(), now=NOW)
+
     def test_unscored_other_matchups_do_not_block_verified_daily_points(self):
         data = league()
         data['schedule'].append(dict(id=999, matchupPeriodId=20,
@@ -108,8 +123,6 @@ class NormalizeTests(unittest.TestCase):
         data = league(); data['schedule'].pop(); variants.append(data)
         data = league(); data['schedule'][0]['away'] = None; variants.append(data)
         data = league(); data['schedule'].append(copy.deepcopy(data['schedule'][0])); variants.append(data)
-        data = league(); data['settings']['scheduleSettings']['matchupPeriods']['7'] = [44]; variants.append(data)
-        data = league(); data['settings']['scheduleSettings']['matchupPeriods'] = {'7': [45]}; variants.append(data)
         data = league(); data['schedule'].append(dict(matchupPeriodId=7, home=dict(teamId=1, pointsByScoringPeriod={'44': 2}), away=dict(teamId=2)))
         variants.append(data)
         for index, data in enumerate(variants):

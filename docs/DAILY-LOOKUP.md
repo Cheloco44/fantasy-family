@@ -6,6 +6,7 @@ This diagnostic answers the owner's request for aggregate fantasy points earned 
 
 - The public ESPN season schedule supplies game timestamps and scoring-period IDs. The collector verifies the Arizona date against that schedule; it must not infer the date by subtracting one from today's period. The requested date currently maps to scoring period **44**, not current period 45.
 - The protected league read requests that exact scoring period. Only `schedule[].home/away.pointsByScoringPeriod['44']` is accepted as the aggregate daily score. `totalPointsLive` and `totalPoints` are not accepted as substitutes.
+- Explicit period-44 score entries identify the matchup period; a unique candidate and complete eight-team coverage are required. Configured week groupings may differ from the actual entries and do not override date-keyed daily scores. The configured map is used only when no explicit daily entry identifies a period, and that fallback must itself be unique; daily totals still remain unavailable when missing.
 - Team names and IDs are taken from ESPN, without guessing links to owner-supplied manager profiles.
 - Zero is a valid daily score. A missing value is unavailable, not zero. Partial availability must be disclosed rather than called a complete result.
 - Professional-game `statsOfficial` evidence is reported separately; even completed games may receive later stat corrections. These are the provider's scores as returned at collection time, not a preserved contemporaneous snapshot.
