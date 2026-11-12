@@ -69,6 +69,19 @@ class NormalizeTests(unittest.TestCase):
         self.assertIsNone(result[2]['pointSource'])
         self.assertNotIn('providerPrivate', json.dumps(result))
 
+    def test_unscored_other_matchups_do_not_block_verified_daily_points(self):
+        data = league()
+        data['schedule'].append(dict(id=999, matchupPeriodId=20,
+                                     home=dict(teamId=1, pointsByScoringPeriod=None),
+                                     away=dict(teamId=2, pointsByScoringPeriod=None)))
+        result = lookup.normalize(data, metadata(), now=NOW)
+        self.assertEqual(len(result['teams']), 8)
+        self.assertTrue(all(t['dailyPoints'] == 10 for t in result['teams']))
+        data['schedule'][0]['home']['pointsByScoringPeriod'] = None
+        result = lookup.normalize(data, metadata(), now=NOW)
+        self.assertIsNone(result['teams'][0]['dailyPoints'])
+        self.assertFalse(result['teams'][0]['available'])
+
     def test_duplicate_canonical_names_are_rejected(self):
         data = league(); data['teams'][1]['name'] = data['teams'][0]['name']
         with self.assertRaises(ValueError):

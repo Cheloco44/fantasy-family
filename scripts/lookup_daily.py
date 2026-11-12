@@ -95,6 +95,8 @@ def _normalize(data, metadata, *, now):
             if side is None:
                 continue
             points = side.get('pointsByScoringPeriod', {})
+            if points is None:
+                continue  # Unscored periods supply no date-to-matchup evidence.
             if type(points) is not dict:
                 raise ValueError
             if '44' in points:
@@ -125,6 +127,8 @@ def _normalize(data, metadata, *, now):
             if team_id not in names or team_id in sides:
                 raise ValueError
             points = side.get('pointsByScoringPeriod', {})
+            if points is None:
+                points = {}  # Null daily evidence is unavailable, never zero.
             available = '44' in points
             value = points['44'] if available else None
             if available and (type(value) not in (int, float) or not math.isfinite(value)):
