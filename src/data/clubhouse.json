@@ -18,7 +18,10 @@
       "scoutingReport": null,
       "approved": true,
       "espnTeamId": null,
-      "image": "avatars/marcelo.webp"
+      "image": "avatars/marcelo.webp",
+      "loreTitle": "The Commissioner — The League’s Supreme Ruler",
+      "loreText": "He doesn’t manage a fantasy league; he governs a tiny sports dictatorship with a weekly controversy budget. If there’s a questionable rule, he’ll enforce it. If there’s no questionable rule, he’ll invent one—anything for the win. The constitution says “fair play”; the commissioner says, “Show me where.”",
+      "loreKind": "fictional-league-lore"
     },
     {
       "slug": "rich",
@@ -31,7 +34,10 @@
       "scoutingReport": null,
       "approved": true,
       "espnTeamId": null,
-      "image": "avatars/rich.webp"
+      "image": "avatars/rich.webp",
+      "loreTitle": "The Juice — The Comeback Victim",
+      "loreText": "The Juice enters every season like he’s starring in a sports movie nobody else has seen. When his team loses, suddenly it’s a conspiracy: bad coaching, bad luck, bad teammates—everybody’s at fault except the guy who drafted the team. The “juice” rumors are completely made up, of course. Allegedly.",
+      "loreKind": "fictional-league-lore"
     },
     {
       "slug": "zach",
@@ -44,7 +50,10 @@
       "scoutingReport": null,
       "approved": true,
       "espnTeamId": null,
-      "image": "avatars/zach.webp"
+      "image": "avatars/zach.webp",
+      "loreTitle": "The Bug — The Polite Assassin",
+      "loreText": "He’s calm, quiet, and much too nice for this league. Then his team sneaks up and beats somebody who was already planning the victory speech. He doesn’t need to talk trash; his roster sends a brief, respectful notification that you lost.",
+      "loreKind": "fictional-league-lore"
     },
     {
       "slug": "ben",
@@ -57,7 +66,10 @@
       "scoutingReport": null,
       "approved": true,
       "espnTeamId": null,
-      "image": "avatars/ben.webp"
+      "image": "avatars/ben.webp",
+      "loreTitle": "Blue Hair — The Chaos-and-Quiet Specialist",
+      "loreText": "He’ll light the group chat on fire, toss in one last jab, then disappear like the witness protection program just called. He bets on MMA, complains when the bet loses, and threatens to quit whenever the universe fails to follow his picks. He’s not leaving, though. He’s just making sure everyone knows he could.",
+      "loreKind": "fictional-league-lore"
     },
     {
       "slug": "jake",
@@ -70,7 +82,10 @@
       "scoutingReport": null,
       "approved": true,
       "espnTeamId": null,
-      "image": "avatars/jake.webp"
+      "image": "avatars/jake.webp",
+      "loreTitle": "The Caveman — The Kings’ Unofficial Enforcer",
+      "loreText": "He loves the Kings, breaks things, and delivers banter with the self-awareness of a boulder rolling downhill. He was the commissioner’s second-in-command until he secretly helped Erik organize his bench. That wasn’t betrayal, he says. It was “UGG—help friend.”",
+      "loreKind": "fictional-league-lore"
     },
     {
       "slug": "robert",
@@ -83,7 +98,10 @@
       "scoutingReport": null,
       "approved": true,
       "espnTeamId": null,
-      "image": "avatars/robert.webp"
+      "image": "avatars/robert.webp",
+      "loreTitle": "Blue Hat — The Dodgers’ Most Animated Fan",
+      "loreText": "The jokes stay on league chaos: especially the parade of new coaches he keeps adding instead of addressing the turnover. He also dislikes the commissioner with the focus of a man who has studied the rulebook purely to find new reasons to complain.",
+      "loreKind": "fictional-league-lore"
     },
     {
       "slug": "erik",
@@ -96,7 +114,10 @@
       "scoutingReport": null,
       "approved": true,
       "espnTeamId": null,
-      "image": "avatars/erik.webp"
+      "image": "avatars/erik.webp",
+      "loreTitle": "Auto Erik — The Banana-Powered Manager",
+      "loreText": "Erik missed the opening days, set the team to auto, and let destiny take the wheel. Now his best friend is the caveman, his roster is a work in progress, and his draft strategy appears to involve bananas and hope. Somehow, the robot is still clocking in every week.",
+      "loreKind": "fictional-league-lore"
     },
     {
       "slug": "kyle",
@@ -109,7 +130,10 @@
       "scoutingReport": null,
       "approved": true,
       "espnTeamId": null,
-      "image": "avatars/kyle.webp"
+      "image": "avatars/kyle.webp",
+      "loreTitle": "The Young Monkey — The Self-Appointed GOAT",
+      "loreText": "He’s clueless about hockey, confused by fantasy, and somehow still has a take on every single thing. He stirs the chat until everyone’s arguing, then acts shocked when the jokes circle back to him. And no topic is safe from his favorite expert: AI.",
+      "loreKind": "fictional-league-lore"
     }
   ],
   "memes": [

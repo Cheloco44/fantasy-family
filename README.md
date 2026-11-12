@@ -41,6 +41,10 @@ After reviewed source is fast-forwarded to main, run **Actions → Deploy public
 
 Verify the exact run head SHA, all jobs and the public site before saying deployment succeeded. URL: https://cheloco44.github.io/fantasy-family/ . This is public; noindex is not privacy or authentication. No paid service has been approved.
 
+## Fictional league lore
+
+The owner supplied eight playful storylines and confirmed The Juice is rich and The Commissioner is Marcelo. Store these in `loreTitle`, `loreText`, and `loreKind`, separate from factual `bio`, favorite teams and verified ESPN data. Both the manager directory and individual pages disclose fiction/exaggerated banter. No narrative quote is presented as a real statement by a family member. Robert’s approved public story focuses on roster churn and league rivalry. Do not use these fictional anecdotes as evidence for performance recaps.
+
 ## Edit profiles and memes
 
 `src/data/clubhouse.json` is the content source. Preserve supplied display names/team names unless corrected by the owner. Profile `approved` is an editorial record, not a security boundary. Do not invent bios, awards, favorite teams or quotes.

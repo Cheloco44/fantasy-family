@@ -14,9 +14,15 @@ const base = import.meta.env.BASE_URL;
     <div class="eyebrow">THE FRONT OFFICE / OWNER-SUPPLIED PROFILE</div>
     <h1>{m.alias}</h1>
     <h2>{m.team}</h2>
+    <section aria-label="Fictional league lore">
+      <div class="eyebrow">FICTIONAL LEAGUE LORE</div>
+      <h3>{m.loreTitle}</h3>
+      <p class="small muted">Owner-supplied storylines and exaggerated banter—not factual biography, real allegations, or quotes attributed to the managers.</p>
+      <p>{m.loreText}</p>
+    </section>
     <dl class="definition">
       <dt>Favorite NHL team</dt><dd>{m.favoriteTeam || 'Not supplied.'}</dd>
-      <dt>Biography</dt><dd>{m.bio || 'Not supplied. The manager writes this one.'}</dd>
+      <dt>Self-written biography</dt><dd>{m.bio || 'Not supplied. The manager writes this one.'}</dd>
       <dt>Championships, rivalries & moments</dt><dd>Not supplied. No imaginary trophy cabinet.</dd>
       <dt>Scouting report</dt><dd>{m.scoutingReport || 'No manager-approved scouting report yet.'}</dd>
     </dl>
