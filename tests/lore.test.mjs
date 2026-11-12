@@ -23,7 +23,20 @@ test('owner-supplied lore maps to the confirmed eight managers without becoming 
   assert.equal(m.scoutingReport,null);
  }
  const robert=data.managers.find(m=>m.slug==='robert');
- assert.equal(robert.loreText,'The jokes stay on league chaos: especially the parade of new coaches he keeps adding instead of addressing the turnover. He also dislikes the commissioner with the focus of a man who has studied the rulebook purely to find new reasons to complain.');
+ assert.match(robert.loreText,/team moms/);
+ assert.match(robert.loreText,/Team Anti-Commish/);
+ assert.doesNotMatch(robert.loreText,/rulebook|reasons to complain/);
+ const rich=data.managers.find(m=>m.slug==='rich');
+ assert.match(rich.loreText,/roid rage/);
+ assert.match(rich.loreText,/house visit/);
+ assert.doesNotMatch(rich.loreText,/rumors are completely made up|Allegedly/);
+ const ben=data.managers.find(m=>m.slug==='ben');
+ assert.match(ben.loreText,/anything doesn’t go his way/);
+ assert.doesNotMatch(ben.loreText,/MMA|bets on|bet loses/);
+ const kyle=data.managers.find(m=>m.slug==='kyle');
+ assert.match(kyle.loreText,/return fire/);
+ assert.match(kyle.loreText,/AI’s fault/);
+ assert.doesNotMatch(kyle.loreText,/acts shocked|favorite expert/);
 });
 test('built profiles and directory disclose fiction, not real allegations or attributed quotes',()=>{
  const directory=readFileSync('dist/managers/index.html','utf8');
