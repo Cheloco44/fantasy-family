@@ -1,6 +1,6 @@
 # Redlands Possum Busters
 
-A local Astro clubhouse preview for Marcelo's 2026–27 family ESPN Fantasy NHL league. Public-site design was selected; **nothing is deployed and publication of specific content is not approved yet**.
+An Astro clubhouse demo for the 2026–27 Redlands Possum Busters ESPN Fantasy NHL league. Marcelo approved publishing this demo source and a manual read-only access-check workflow to `Cheloco44/fantasy-family`. **No website deployment, daily schedule, or actual league-data publication is approved or enabled.**
 
 ## Actual status
 
@@ -48,7 +48,7 @@ Optional manager avatar/logo, favorite team, approved scouting report, champions
 
 ## ESPN access
 
-Read `docs/ESPN-SETUP.md` for the private terminal-only probe. Never paste cookies in chat. No `PUBLIC_` credential variables, cookies in config, `.env` files in commits, raw ESPN records in `public/`, or secrets in Actions logs/artifacts. Session cookies may be account-wide even though our client only sends GET requests.
+Read `docs/ESPN-SETUP.md` for the private terminal probe and manually dispatched GitHub Actions access check. Never paste cookies in chat. No `PUBLIC_` credential variables, cookies in config, `.env` files in commits, raw ESPN records in `public/`, or secrets in Actions logs/artifacts. Session cookies may be account-wide even though our client only sends GET requests.
 
 ## Integration contract — not implemented yet
 
@@ -65,7 +65,7 @@ The small tested `src/lib/clock.mjs` utility implements the Arizona calendar bou
 
 ## Scheduling proposal — disabled
 
-05:00 America/Phoenix corresponds to 12:00 UTC year-round. A future GitHub Actions schedule would use `0 12 * * *` with manual dispatch. GitHub scheduling can be delayed. Nothing is installed or scheduled now. Use private repository Actions secrets only after review and explicit approval; never run credentialed jobs for untrusted PR code. Pin actions to verified commit SHAs and keep permissions minimal. Hosting/Actions allowances must be checked before enabling; no paid services without approval.
+05:00 America/Phoenix corresponds to 12:00 UTC year-round. A future GitHub Actions schedule would use `0 12 * * *` with manual dispatch. GitHub scheduling can be delayed. No daily refresh is installed or scheduled. A manual-only ESPN access-check workflow is included. Use GitHub repository Actions secrets (not variables); never run credentialed jobs for untrusted PR code. Pin actions to verified commit SHAs and keep permissions minimal. Hosting/Actions allowances must be checked before enabling; no paid services without approval.
 
 ## Publication instructions — gated
 
@@ -89,4 +89,4 @@ GitHub Pages is public for this design. A private repo is not a privacy control 
 
 ## Cost and scope
 
-No new paid service, account or repository created. No publication, transaction, trade or lineup mutation. No modifications to the gym app. A usable sample preview is not the first live-data milestone.
+No new paid service, account or repository created. Only demo source and the manual access-check workflow are approved for publication. No transaction, trade or lineup mutation. No modifications to the gym app. A usable sample preview is not the first live-data milestone.

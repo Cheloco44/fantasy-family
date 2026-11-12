@@ -1,5 +1,5 @@
 # Redlands Possum Busters
-Local prototype only. No remote or deployment authorization yet.
+Public demo source and the manual read-only ESPN access-check workflow are approved for https://github.com/Cheloco44/fantasy-family.git. Bootstrap main only if the remote is still empty; no force pushes. No Pages deployment, scheduled runs, actual league-data publication, or paid services are authorized.
 2026-27 ESPN NHL league 1399646897, ESPN season year 2027. Head-to-head subtype unverified.
 Arizona recap boundary: America/Phoenix. Scheduled target 05:00 local / 12:00 UTC, not enabled.
 All current profiles, memes and recap text are explicitly DEMO content, not actual league information.

@@ -88,6 +88,16 @@ The season is the fixed requested season; if ESPN supplies `seasonId`, a mismatc
 
 Exit `1` means access or settings could not be verified: HTTP 401, other HTTP errors, redirects, timeouts, malformed/oversized JSON, or missing/wrong-shaped scoring or roster settings all fail closed with the same generic message. This intentionally does not expose exception detail. A failure does not prove that cookies alone are the issue: season availability, authorization, and API/schema changes remain possible blockers. Exit `2` covers lack of network opt-in or CLI usage errors. Do not infer live integration success from offline tests.
 
-## Future pipeline design only — nothing enabled now
+## Manual GitHub Actions access check
 
-A future daily target of **05:00 America/Phoenix = 12:00 UTC** could use an Actions UTC cron of `0 12 * * *`. GitHub Actions scheduled runs can be delayed (or missed); this is a target, not an exact delivery guarantee. Any future implementation needs explicit authorization, protected secret handling, minimal permissions, data minimization, and independently verified league/scoring mapping before recap generation. No workflow, scheduler, deployment, publication, or recap generator is created or enabled here.
+Marcelo approved the demo source and this manual workflow for `Cheloco44/fantasy-family`. The owner reports adding repository Actions secrets `ESPN_S2` and `ESPN_SWID`; no secret values are retrieved by the assistant.
+
+After the reviewed workflow is pushed to `main`, open **Actions → ESPN read-only access check → Run workflow**, select `main`, and run it. The assistant may dispatch this approved check if its GitHub token has Actions write permission. Otherwise the owner can use that button without sharing or broadening credentials.
+
+The workflow accepts manual dispatch only, restricts execution to this repository's `main`, grants `contents: read`, pins checkout to a verified commit, and disables persisted Git credentials. Offline tests run without ESPN secrets; only the final fixed-GET probe step receives the two secrets. Missing secrets fail the step. No raw API payload, credentials, cache, artifact, site data or summary is uploaded. The probe prints only its sanitized numeric success summary or generic error.
+
+A green workflow establishes settings access from the runner only. It does not validate scoring rules, historical lineups, the daily recap, website deployment, or a scheduler. Workflow status and the actual run ID must be read back before reporting success. Logs in this public repository may be publicly visible; never add raw settings or debugging output to this job.
+
+## Future daily pipeline — disabled
+
+A future daily target of **05:00 America/Phoenix = 12:00 UTC** could use an Actions UTC cron of `0 12 * * *`. GitHub Actions scheduled runs can be delayed (or missed); this is a target, not an exact delivery guarantee. Any future implementation needs explicit authorization, protected secret handling, minimal permissions, data minimization, and independently verified league/scoring mapping before recap generation. No scheduler, website deployment, actual league-data publication, or recap generator is enabled. The manual-only access-check workflow described above is the sole automation currently implemented.
