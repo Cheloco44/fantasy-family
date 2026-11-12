@@ -12,7 +12,7 @@ A lightweight Astro clubhouse for the 2026–27 family ESPN Fantasy NHL league. 
 
 ## What's NOT implemented
 
-Actual scoring subtype/settings interpretation, ESPN team-ID mapping, historical active/bench attribution, accurate daily recaps, live standings, correction replay, last-good data preservation, and the05:00 America/Phoenix refresh remain unimplemented/unverified. Sample recaps are not real results. Biographies, favorite NHL teams, achievements and approved scouting reports remain empty.
+Current collection and display are being added and must pass an authenticated run/output check before claiming actual results. ESPN team-ID-to-manager mapping, historical active/bench attribution, accurate daily recaps, correction replay, and the05:00 America/Phoenix automatic refresh remain unimplemented/unverified. Sample recaps are not real results. Biographies, favorite NHL teams, achievements and approved scouting reports remain empty.
 
 ## Run locally
 
@@ -54,6 +54,14 @@ The owner supplied eight playful storylines and confirmed The Juice is rich and 
 - Memes: add approved static PNG/JPG/WebP/GIF files to `public/memes/`, with unique id, caption, contributor nickname, ISO date, tags, optional manager slug and exactly one featured item. Strip EXIF and confirm rights/consent. Untrusted SVG files must be sanitized or converted; current SVG artwork was authored locally.
 - Search matches captions; tag and manager filters combine. `manager: null` means unassigned, not an implied person. The gallery works without JavaScript, though filtering needs it.
 - Keep headshots, character references and memes distinct. Receiving an image isn't approval to publish the whole collection. The47-image vault folder is not copied into this repo.
+
+## Current standings and matchup snapshots
+
+The owner approved public ESPN team names, standings and current matchup scores. A separate manual collector workflow exports an allowlisted snapshot without account/member details. It does not alter lineups, trades or transactions. See `docs/CURRENT-DATA.md`. The current-data file is separate from fictional lore and sample recaps.
+
+The website shows a manual snapshot timestamp in America/Phoenix and dynamically warns once it is 24 hours old. No real-time or automatic-refresh claim is made. Scores are full-matchup totals, never yesterday’s contribution. Category W–L–T is not fantasy points. Missing scores are unavailable, not fabricated zeros; missing ranks are not invented. Profile links wait for verified ESPN team-ID mappings.
+
+Failed collection must leave the last successful snapshot untouched. The collector does not commit source or deploy; after a successful run the exact sanitized artifact must be checked before importing and manually deploying. No credentialed job runs on pull requests.
 
 ## ESPN setup and next gates
 
