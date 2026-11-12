@@ -1,0 +1,31 @@
+---
+import snapshot from '../data/current.json';
+const connected = snapshot.mode === 'live';
+const fetched = connected && snapshot.fetchedAt ? new Date(snapshot.fetchedAt).toLocaleString('en-US',{timeZone:'America/Phoenix',dateStyle:'medium',timeStyle:'short'}) : null;
+---
+<section class="status" aria-labelledby="status-heading" data-snapshot-mode={snapshot.mode} data-snapshot-time={snapshot.fetchedAt || ''}>
+  <div class="eyebrow">DATA DESK</div><h2 id="status-heading">Freshness matters.</h2>
+  <div class="status-value" data-freshness-label aria-live="polite">{connected ? 'ESPN snapshot' : 'Not connected'}</div>
+  <p class="small muted">{fetched ? `Last successful results fetch: ${fetched} Arizona time` : 'No successful ESPN results refresh'}</p>
+  <p class="small" data-stale-message>{connected ? 'Manual snapshot. Check the timestamp; no automatic score refresh is enabled.' : 'Live results are unavailable. No scores have been inferred from sample content.'}</p>
+  <dl><dt>Scoring format</dt><dd>{connected ? (snapshot.scoringType === 'H2H_CATEGORY' ? 'Head-to-head categories' : 'Head-to-head points') : 'Awaiting validated settings'}</dd><dt>Daily recap target</dt><dd>05:00 · America/Phoenix · Not enabled</dd><dt>Daily recap content</dt><dd>DEMO DATA · Not actual daily results</dd></dl>
+  <p class="small divider">Standings and matchup totals are separate from yesterday's player performance. Storylines are never scoring evidence.</p>
+  <a class="btn" href="https://github.com/Cheloco44/fantasy-family/actions/workflows/refresh-current.yml" target="_blank" rel="noopener noreferrer">Admin: manual data collection ↗</a>
+  <p class="small muted" style="margin-top:12px">Collection exports a snapshot for review; publishing it to this site is a separate step.</p>
+</section>
+<script>
+import { freshness } from '../lib/current-data.mjs';
+const panel=document.querySelector<HTMLElement>('[data-snapshot-mode]');
+function updateFreshness(){
+ if(!panel)return;
+ const state=freshness({mode:panel.dataset.snapshotMode,fetchedAt:panel.dataset.snapshotTime});
+ const label=panel.querySelector('[data-freshness-label]');
+ const message=panel.querySelector('[data-stale-message]');
+ if(label)label.textContent=state==='unavailable'?'Not connected':state==='stale'?'Stale ESPN snapshot':'ESPN snapshot';
+ const compact=document.querySelector('[data-compact-freshness]');
+ if(compact)compact.textContent=state==='stale'?'STALE: this snapshot is at least 24 hours old. Scores may have changed.':state==='current'?'Manual ESPN snapshot—not a real-time feed.':'No verified results snapshot yet.';
+ if(message)message.textContent=state==='unavailable'?'No valid results timestamp. No scores are inferred.':state==='stale'?'Warning: this snapshot is at least 24 hours old. The last successful data is retained; request a manual refresh.':'Manual snapshot, not a real-time feed. No automatic score refresh is enabled.';
+}
+updateFreshness();setInterval(updateFreshness,60000);
+window.addEventListener('pageshow',updateFreshness);
+</script>

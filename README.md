@@ -12,7 +12,7 @@ A lightweight Astro clubhouse for the 2026–27 family ESPN Fantasy NHL league. 
 
 ## What's NOT implemented
 
-Current collection and display are being added and must pass an authenticated run/output check before claiming actual results. ESPN team-ID-to-manager mapping, historical active/bench attribution, accurate daily recaps, correction replay, and the05:00 America/Phoenix automatic refresh remain unimplemented/unverified. Sample recaps are not real results. Biographies, favorite NHL teams, achievements and approved scouting reports remain empty.
+Authenticated current collection succeeded on run `43273159316`: ESPN reported head-to-head points, eight teams and four matchups. The source snapshot is an exact copy of that normalized artifact; its display still requires the reviewed Pages release and URL read-back. ESPN team-ID-to-manager mapping, historical active/bench attribution, accurate daily recaps, correction replay, and the05:00 America/Phoenix automatic refresh remain unimplemented/unverified. Sample recaps are not real results. Biographies, favorite NHL teams, achievements and approved scouting reports remain empty.
 
 ## Run locally
 
@@ -65,7 +65,7 @@ Failed collection must leave the last successful snapshot untouched. The collect
 
 ## ESPN setup and next gates
 
-See `docs/ESPN-SETUP.md`. Never paste cookies in chat or put them in files/history/build outputs. Session cookies may grant account-wide access even though the client performs only a fixed GET. Use Actions secrets only in the separate probe workflow. Never pass them to the public site build.
+See `docs/ESPN-SETUP.md`. Never paste cookies in chat or put them in files/history/build outputs. Session cookies may grant account-wide access even though the client performs only a fixed GET. Use Actions secrets only in the separate read-only probe and collection workflows. Never pass them to the public site build.
 
 Before live recaps: validate actual points/category rules, scoring vs matchup periods, historical lineups, date/game mapping and goalie constraints. Compare a completed date against ESPN. Test off-days, postponements, missing results, weighted ratios, correction replay, duplicate-date prevention and failure preservation. Store only approved allowlisted public fields; never ship raw provider payloads or member records.
 

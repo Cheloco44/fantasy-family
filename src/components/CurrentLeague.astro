@@ -1,0 +1,37 @@
+---
+import snapshot from '../data/current.json';
+import { scoreText } from '../lib/current-data.mjs';
+const connected = snapshot.mode === 'live';
+const teams = [...snapshot.teams].sort((a,b) => (a.standing ?? Infinity) - (b.standing ?? Infinity));
+const names = new Map(snapshot.teams.map(t => [t.id, t.name]));
+const category = snapshot.scoringType === 'H2H_CATEGORY';
+const asOf = connected && snapshot.fetchedAt ? new Date(snapshot.fetchedAt).toLocaleString('en-US',{timeZone:'America/Phoenix',dateStyle:'medium',timeStyle:'short'}) : null;
+const name = side => side ? (names.get(side.teamId) || 'Team unavailable') : 'BYE';
+---
+<div class="eyebrow">CURRENT LEAGUE DESK</div>
+<h1>The scoreboard.</h1>
+{asOf && <p class="small muted">Snapshot collected {asOf} · Arizona time</p>}
+<p class="small" data-compact-freshness aria-live="polite">{connected ? 'Manual ESPN snapshot—not a real-time feed.' : 'No verified results snapshot yet.'}</p>
+<section aria-labelledby="matchups">
+  <div class="section-heading"><h2 id="matchups">This week's matchups</h2><span class="small muted">{connected ? 'ESPN SNAPSHOT' : 'NOT CONNECTED'}</span></div>
+  {connected ? <>
+    <p class="small muted" style="margin-top:16px">Matchup period {snapshot.matchupPeriodId} · {category ? 'Category W–L–T' : 'Fantasy points'} · Full matchup totals, not daily scores. This is a collected snapshot, not a real-time feed.</p>
+    {snapshot.matchups.length ? <div class="matchup-list">{snapshot.matchups.map(match => <article class="matchup-card">
+      <div class="matchup-side"><strong>{name(match.home)}</strong><span>{scoreText(match.home,snapshot.scoringType)}</span></div>
+      <div class="matchup-side"><strong>{name(match.away)}</strong><span>{scoreText(match.away,snapshot.scoringType)}</span></div>
+      {!category && [match.home,match.away].some(s=>s?.pointSource==='totalPoints') && <p class="small muted">ESPN reported matchup total; a separate live-total field was unavailable.</p>}
+      {category && <p class="small muted">Each team's categories won–lost–tied. Not weekly matchup victories or fantasy points.</p>}
+    </article>)}</div> : <div class="empty"><p>No current matchup was returned. No opponent or score is assumed.</p></div>}
+  </> : <div class="empty"><strong>The scoreboard is waiting on a verified data import.</strong><p>Access to league settings has been proven. Actual standings, scoring format and matchup totals have not been imported yet.</p><span class="small">A daily recap is not a final matchup result.</span></div>}
+</section>
+<section aria-labelledby="standings">
+  <div class="section-heading"><h2 id="standings">League standings</h2><span class="small muted">{connected ? 'ESPN RECORDS' : 'NO VERIFIED DATA'}</span></div>
+  {connected ? <>
+    <p class="small muted" style="margin-top:16px">ESPN's current playoff-seed order and overall record. {category ? 'Category-league records can count category results, not just weekly wins.' : 'Records are reported directly by ESPN.'} Missing ranks are not invented.</p>
+    <div class="table-wrap"><table><thead><tr><th scope="col">Rank</th><th scope="col">Team</th><th scope="col">W–L–T</th></tr></thead><tbody>{teams.map(t=><tr><td>{t.standing ?? '—'}</td><th scope="row">{t.name}</th><td>{t.wins}–{t.losses}–{t.ties}</td></tr>)}</tbody></table></div>
+    <p class="small muted">Names above come from ESPN. Links to manager profiles will wait until ESPN team IDs are explicitly verified.</p>
+  </> : <div class="empty"><p>Actual ranks and records will appear after authorized retrieval and validation. No imaginary champions here.</p></div>}
+</section>
+<style>
+.matchup-list{display:grid;gap:14px;margin:20px 0}.matchup-card{border:1px solid var(--line);padding:20px;background:#fffef8}.matchup-side{display:flex;align-items:baseline;justify-content:space-between;gap:20px;padding:8px 0}.matchup-side strong{overflow-wrap:anywhere;min-width:0}.matchup-side span{font:bold 24px/1.3 monospace;flex-shrink:0}.matchup-card p{margin:12px 0 0}.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{border-bottom:1px solid var(--line);padding:13px 10px;text-align:left}thead th{font:11px monospace;text-transform:uppercase;color:var(--muted)}tbody th{font-weight:normal;overflow-wrap:anywhere}td:first-child{width:45px}td:last-child{white-space:nowrap}@media(max-width:560px){.matchup-card{padding:14px}.matchup-side{gap:12px}.matchup-side span{font-size:19px}th,td{padding:12px 6px}}
+</style>

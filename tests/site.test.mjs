@@ -16,6 +16,8 @@ test('profiles, archive and filterable meme gallery build as real routes', () =>
 test('clubhouse build is explicit about demo data and public status', () => {
   assert.ok(existsSync('dist/index.html'), 'Astro must produce the dashboard');
   const html = readFileSync('dist/index.html', 'utf8');
-  for (const text of ['Redlands Possum Busters', 'DEMO DATA', 'No successful ESPN results refresh', 'America/Phoenix', 'Not connected']) assert.ok(html.includes(text), text);
+  const current = JSON.parse(readFileSync('src/data/current.json', 'utf8'));
+  const statusText = current.mode === 'live' ? ['ESPN snapshot', 'Last successful results fetch'] : ['No successful ESPN results refresh', 'Not connected'];
+  for (const text of ['Redlands Possum Busters', 'DEMO DATA', 'America/Phoenix', ...statusText]) assert.ok(html.includes(text), text);
   assert.ok(!html.includes('espn_s2'));
 });
