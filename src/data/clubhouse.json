@@ -74,7 +74,7 @@
     {
       "slug": "jake",
       "alias": "Jake",
-      "team": "Cave Kings",
+      "team": "CAVE N1KGAR",
       "initials": "JA",
       "characterDescription": "caveman; has many different faces",
       "favoriteTeam": null,
@@ -89,7 +89,7 @@
     },
     {
       "slug": "robert",
-      "alias": "Robert",
+      "alias": "IR BOB",
       "team": "Anti-Chel Warriors",
       "initials": "RO",
       "characterDescription": "older guy in a dodgers hat",
@@ -99,8 +99,8 @@
       "approved": true,
       "espnTeamId": null,
       "image": "avatars/robert.webp",
-      "loreTitle": "Blue Hat — The Dodgers’ Most Animated Fan",
-      "loreText": "Blue Hat’s fictional front office has a revolving door for new coaches and an entire recruiting department for absolutely unhinged team moms. At this point the carpool needs its own general manager. He isn’t filing complaints with the Commissioner; he’s fully enlisted in Team Anti-Commish. If this league ever stages a coup, Blue Hat already has the matching Dodgers cap.",
+      "loreTitle": "IR BOB — The Dodgers’ Most Animated Fan",
+      "loreText": "IR BOB’s fictional front office has a revolving door for new coaches and an entire recruiting department for absolutely unhinged team moms. At this point the carpool needs its own general manager. He isn’t filing complaints with the Commissioner; he’s fully enlisted in Team Anti-Commish. If this league ever stages a coup, IR BOB already has the matching Dodgers cap.",
       "loreKind": "fictional-league-lore"
     },
     {

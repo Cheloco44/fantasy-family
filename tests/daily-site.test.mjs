@@ -42,7 +42,7 @@ test('daily presentation preserves complete art and wraps manager controls on ph
   assert.match(css, /\[hidden\][^{]*\{display:none!important/);
 });
 
-test('daily edition routes consume the shared archive with explicit evidence and weekly separation', () => {
+test('daily edition routes consume the shared archive with collapsed source evidence', () => {
   const home = source('pages/index.astro');
   assert.ok(home.includes("../data/recaps.json"), 'homepage must read the real archive');
   assert.ok(home.includes('data-recap-date'));
@@ -50,7 +50,18 @@ test('daily edition routes consume the shared archive with explicit evidence and
   assert.ok(archive.includes('recaps.editions.map'));
   assert.ok(existsSync('src/pages/recaps/[date].astro'), 'individual date route');
   const daily = source('pages/recaps/[date].astro');
-  for (const marker of ['getStaticPaths', 'sourceFetchedAt', 'weeklyContextAt', 'coverageNote', 'trendNotes', 'DAILY ROUND', 'approvalStatus', 'isArchive']) assert.ok(daily.includes(marker), marker);
+  for (const marker of ['getStaticPaths', 'sourceFetchedAt', 'coverageNote', '<details', '<summary>Data details</summary>', 'DAILY ROUND', 'approvalStatus', 'isArchive']) assert.ok(daily.includes(marker), marker);
+});
+
+test('coverage warnings remain outside the collapsed methodology on every recap surface', () => {
+  for (const path of ['pages/index.astro', 'pages/recaps/index.astro', 'pages/recaps/[date].astro']) {
+    const reading = source(path).replace(/<details\b[^>]*>[\s\S]*?<\/details>/g, '');
+    assert.match(reading, /class="freshness-warning" role="status"/, `${path}: visible coverage warning`);
+    assert.match(reading, /No NHL games scheduled for this Arizona date/);
+    assert.match(reading, /Daily scores are incomplete/);
+    assert.match(reading, /Missing scores are unavailable, not zero/);
+    assert.match(reading, /data-recap-stale/);
+  }
 });
 
 test('global clubhouse labels distinguish real daily aggregates from the sample', () => {

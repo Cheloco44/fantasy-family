@@ -31,7 +31,7 @@ test('clubhouse leads with the actual latest daily round rather than global demo
   }
 });
 
-test('date editions retain all real team totals, evidence, approved art and separate weekly snapshots', () => {
+test('date editions retain scores, stories and source evidence without per-card bookkeeping', () => {
   for (const edition of recaps.editions) {
     const page = html(`recaps/${edition.date}/index.html`);
     assert.ok(page.includes(escaped(edition.headline)));
@@ -41,13 +41,37 @@ test('date editions retain all real team totals, evidence, approved art and sepa
     assert.ok(!page.includes('UNDATED SAMPLE'));
     assert.equal((page.match(/class="daily-round"/g) || []).length, edition.matchups.length);
     for (const matchup of edition.matchups) {
-      for (const text of [matchup.homeAlias, matchup.awayAlias, matchup.title, matchup.story, ...matchup.trendNotes]) assert.ok(page.includes(escaped(text)), text);
+      for (const text of [matchup.homeAlias, matchup.awayAlias, matchup.title, matchup.story]) assert.ok(page.includes(escaped(text)), text);
+      for (const note of matchup.trendNotes) assert.ok(!page.includes(escaped(note)), 'thin-history notes stay in the source payload');
       for (const points of [matchup.homePoints, matchup.awayPoints]) assert.ok(page.includes(`>${points ?? 'Unavailable'}</strong>`));
-      if (matchup.weeklySummary && edition.weeklyContextAt) {
-        assert.ok(page.includes(escaped(matchup.weeklySummary)));
-        assert.ok(page.includes(`datetime="${edition.weeklyContextAt}"`));
-        assert.ok(page.includes('Separate weekly context'));
-      }
+      if (matchup.weeklySummary) assert.ok(!page.includes(escaped(matchup.weeklySummary)), 'weekly diagnostics stay in the source payload');
+    }
+  }
+});
+
+test('recap reading flow keeps methodology in one closed native Data details at the bottom', () => {
+  const paths = ['index.html', 'recaps/index.html', ...recaps.editions.map(e => `recaps/${e.date}/index.html`)];
+  for (const path of paths) {
+    const page = html(path);
+    const panels = [...page.matchAll(/<details\b([^>]*)>([\s\S]*?)<\/details>/g)];
+    assert.equal(panels.length, 1, `${path}: one native disclosure`);
+    assert.doesNotMatch(panels[0][1], /\bopen(?:\s|=|$)/, 'closed by default');
+    assert.match(panels[0][2], /<summary[^>]*>Data details<\/summary>/);
+    const reading = page.replace(/<details\b[^>]*>[\s\S]*?<\/details>/g, '');
+    assert.doesNotMatch(reading, /statsOfficial|Scoring period|matchup period|What the receipts prove|The receipts|Rivalry notebook|Separate weekly context|coverage 1\/7/);
+    if (path.startsWith('recaps/') && path !== 'recaps/index.html') {
+      assert.ok(page.indexOf('<details') > page.lastIndexOf('class="daily-round"'), 'disclosure follows the rounds');
+      assert.ok(panels[0][2].includes(escaped(recaps.editions.find(e => path.includes(e.date)).coverageNote)));
+    }
+    const prose = page.replace(/<[^>]*>/g, ' ');
+    assert.doesNotMatch(prose, /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/, 'no raw ISO timestamp in body prose');
+  }
+  const home = html('index.html');
+  assert.doesNotMatch(home, /coverage 1\/7|verified DAILY ROUNDS|Rivalry notebook|Separate weekly context/);
+  for (const edition of recaps.editions) {
+    for (const matchup of edition.matchups) {
+      assert.ok(Array.isArray(matchup.trendNotes), 'history evidence remains in source');
+      assert.ok(Object.hasOwn(matchup, 'weeklySummary'), 'weekly evidence remains in source');
     }
   }
 });

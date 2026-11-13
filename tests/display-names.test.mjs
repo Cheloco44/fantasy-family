@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
-const labels={1:"America’s FUPA",2:'District 9',3:'June’s Half-Baked Quacks',4:'The Goon Squad',5:'Cave Kings',6:'Anti-Chel Warriors',7:'Patel Pals',8:'Jive Turkey'};
+const labels={1:"America’s FUPA",2:'District 9',3:'June’s Half-Baked Quacks',4:'The Goon Squad',5:'CAVE N1KGAR',6:'Anti-Chel Warriors',7:'Patel Pals',8:'Jive Turkey'};
 test('owner-requested polished team labels are separate from provider source names',async()=>{
  assert.ok(existsSync('src/lib/team-names.mjs'),'presentation name helper is missing');
  const {teamLabel}=await import('../src/lib/team-names.mjs');
@@ -12,6 +12,8 @@ test('owner-requested polished team labels are separate from provider source nam
   const profile=clubhouse.managers.find(m=>m.slug===editorial.cast[id].slug);
   assert.equal(profile.team,label);
  }
+ assert.equal(editorial.cast['6'].displayName,'IR BOB');
+ assert.equal(clubhouse.managers.find(m=>m.slug==='robert').alias,'IR BOB');
  assert.equal(teamLabel(99,editorial.cast),'Team 99');
  assert.equal(teamLabel(null,editorial.cast),'Team unavailable');
  const source=JSON.parse(readFileSync('src/data/current.json','utf8'));

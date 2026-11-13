@@ -9,7 +9,7 @@ const titles={
  erik:'Auto Erik — The Banana-Powered Manager',
  ben:'Blue Hair — The Chaos-and-Quiet Specialist',
  zach:'The Bug — The Polite Assassin',
- robert:'Blue Hat — The Dodgers’ Most Animated Fan',
+ robert:'IR BOB — The Dodgers’ Most Animated Fan',
  jake:'The Caveman — The Kings’ Unofficial Enforcer',
 };
 test('owner-supplied lore maps to the confirmed eight managers without becoming factual bios',()=>{

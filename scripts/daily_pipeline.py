@@ -456,7 +456,7 @@ def choose_meme(catalog, avatars, day, home_slug, away_slug, points=None):
                 sourceDate=None, isArchive=False, approvalStatus='approved')
 
 
-def rolling_note(bundles, day, tid, alias):
+def rolling_note(bundles, day, tid, alias, *, brief=False):
     start = (date.fromisoformat(day) - timedelta(days=6)).isoformat()
     wins = losses = ties = 0
     for value in bundles:
@@ -470,6 +470,12 @@ def rolling_note(bundles, day, tid, alias):
         losses += points[tid] < points[opponent]
         ties += points[tid] == points[opponent]
     count = wins + losses + ties
+    if brief:
+        if losses >= 3:
+            return f'{alias} is starting to look like a bye week with Wi-Fi: {losses} daily-round losses in the last seven days.'
+        if wins >= 3 and wins > losses:
+            return f'{alias} has stacked {wins} daily-round wins in the last seven days. The group chat is running out of excuses.'
+        return ''
     note = (f'{alias}: {wins}-{losses}-{ties} across {count} verified DAILY ROUNDS in the seven-calendar-day '
             f'window {start}–{day}; coverage {count}/7 calendar dates. Missing dates and off-days '
             'are not losses; not official ESPN weekly W–L.')
@@ -486,7 +492,7 @@ def character_chirp(slug, won):
         'zach': ('June Bug sends a polite notification that the other manager lost.', 'The polite assassin has temporarily become the bug-zapper demonstration.'),
         'ben': ('For once the score went his way. Ben now needs something else to complain about.', 'Ben has filed a complaint with the entire universe. Resignation paperwork remains unsigned.'),
         'jake': ('The Stone Age does not do excuses. The Caveman has kept the receipt.', 'The Caveman is inspecting the scoreboard for something he can fix with a rock.'),
-        'robert': ('Team Anti-Commish is celebrating. The imaginary team-mom group chat has taken over the meeting.', 'Blue Hat is recruiting imaginary team-mom reinforcements. Team Anti-Commish is not disbanding.'),
+        'robert': ('Team Anti-Commish is celebrating. The imaginary team-mom group chat has taken over the meeting.', 'IR BOB is recruiting imaginary team-mom reinforcements. Team Anti-Commish is not disbanding.'),
         'erik': ('Auto Erik has discovered the victory button. Nobody touch the settings.', 'Skynet needs a reboot. Tech support has left the chat.'),
         'kyle': ('Jive Turkey won the day. Somehow AI is still getting blamed for something.', 'The Young Monkey dishes it out; the return fire came with interest. AI is receiving the blame.')}
     return beats.get(slug, ('', ''))[0 if won else 1]
@@ -537,6 +543,10 @@ def build_recaps(bundles, catalog, profiles, *, root=ROOT, now=None):
                         weekly = (f"Current weekly snapshot at {current['fetchedAt']}: {home['displayName']} "
                                   f"{sides[hid]['points']:g}, {away['displayName']} {sides[aid]['points']:g}; "
                                   'separate from the DAILY ROUND, not end-of-day and not a final weekly result.')
+            if status == 'verified-aggregate':
+                chirps = [rolling_note(bundles, day, tid, person['displayName'], brief=True)
+                          for tid, person in ((hid, home), (aid, away))]
+                story = ' '.join([story.strip(), *filter(None, chirps)])
             matches.append(dict(id=match['id'], homeId=hid, awayId=aid, homeAlias=home['displayName'],
                 awayAlias=away['displayName'], homePoints=hp, awayPoints=ap, margin=margin,
                 classification=classification, title=title, story=story,

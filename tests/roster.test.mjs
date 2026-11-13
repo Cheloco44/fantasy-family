@@ -7,8 +7,8 @@ const expected=[
  ['rich','Rich','District 9','old monkey or old man'],
  ['zach','Zach','June’s Half-Baked Quacks','half human half bug'],
  ['ben','Ben','The Goon Squad','blue hair guy with skinny legs'],
- ['jake','Jake','Cave Kings','caveman; has many different faces'],
- ['robert','Robert','Anti-Chel Warriors','older guy in a dodgers hat'],
+ ['jake','Jake','CAVE N1KGAR','caveman; has many different faces'],
+ ['robert','IR BOB','Anti-Chel Warriors','older guy in a dodgers hat'],
  ['erik','Erik','Patel Pals','robot'],
  ['kyle','Kyle','Jive Turkey','young monkey or young guy in a jester hat'],
 ];

@@ -312,6 +312,17 @@ class EditorialTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.report([bundle()], catalog=catalog)
 
+    def test_noteworthy_history_chirps_stay_in_the_story_without_audit_paragraphs(self):
+        history=[]
+        for day in ('2026-11-09','2026-11-10','2026-11-11'):
+            data=bundle();data['daily']['date']=day;data['daily']['teams'][0]['dailyPoints']=0
+            history.append(data)
+        story=self.report(history)['editions'][0]['matchups'][0]['story']
+        self.assertIn('bye week with Wi-Fi',story)
+        self.assertIn('3 daily-round losses',story)
+        self.assertNotIn('coverage',story)
+        self.assertNotIn('1/7',story)
+
     def test_catalog_thresholds_are_real_reviewable_controls(self):
         catalog = editorial(); catalog.update(closeMargin=7, smokedMargin=25)
         data = bundle(); data['daily']['teams'][0]['dailyPoints'] = 16
