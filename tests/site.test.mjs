@@ -76,6 +76,16 @@ test('recap reading flow keeps methodology in one closed native Data details at 
   }
 });
 
+test('archive entries do not repeat the edition deck underneath every headline', () => {
+  const page = html('recaps/index.html');
+  const entries = [...page.matchAll(/<article\b[^>]*class="recap-entry"[^>]*>([\s\S]*?)<\/article>/g)];
+  assert.equal(entries.length, recaps.editions.length);
+  for (const [index, entry] of entries.entries()) {
+    assert.ok(!entry[1].includes(escaped(recaps.editions[index].dek)), 'keep shared framing out of archive entries');
+  }
+  assert.ok(page.includes('Daily rounds by Arizona calendar date.'), 'period framing remains at the archive topic');
+});
+
 test('all rendered image paths are local and resolve to actual built assets', () => {
   for (const path of ['index.html', 'memes/index.html', 'recaps/index.html', ...recaps.editions.map(e => `recaps/${e.date}/index.html`)]) {
     for (const [, src] of html(path).matchAll(/<img\b[^>]*\bsrc="([^"]+)"/g)) {

@@ -201,11 +201,8 @@ def write_packet(repo, value, run, root, report, catalog, avatars, now):
             provisional = value['daily']['status'] != 'verified-aggregate'
             if provisional:
                 caption = 'PROVISIONAL — incomplete daily evidence; no daily win/loss awarded.'
-            elif match['margin'] == 0:
-                caption = 'Daily round tied. Neither gets a victory lap.'
             else:
-                winner = home if scores[str(hid)] > scores[str(aid)] else away
-                caption = f'{winner["displayName"]} takes the daily round by {match["margin"]:g}. Daily bragging rights only.'
+                caption = match['title']
             image = Image.new('RGB', (1280,1280), '#101927')
             image.paste(portrait(root/'public'/avatars[home['slug']]), (50,210))
             image.paste(portrait(root/'public'/avatars[away['slug']]), (670,210))

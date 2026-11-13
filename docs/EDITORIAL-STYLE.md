@@ -11,12 +11,12 @@ The cast is fictional league characterization layered over real aggregate scores
 ## The scoreboard earns the headline
 
 - Use the existing approved cast/ID mapping and display labels. Keep provider names and normalized source bundles untouched. Preserve `CAVE N1KGAR` (including its space) and `IR BOB` exactly; do not normalize, expand or improvise these labels.
-- Only `verified-aggregate` editions award a daily result or result-based roast. The headline leads with the **largest actual opponent-to-opponent DAILY ROUND margin**, names both winner and roasted loser, and includes that margin. Do not substitute the highest individual daily total or a weekly/live total.
+- Only `verified-aggregate` editions award a daily result or result-based roast. The headline leads with the **largest actual opponent-to-opponent daily margin**, names both winner and roasted loser, and includes that margin. Do not substitute the highest individual daily total or a weekly/live total.
 - A margin **at least the catalog's `smokedMargin`** earns the cooked/body-bag treatment. Defaults remain 20 smoked / 5 close; read the catalog, not hardcoded editorial assumptions. Equal leading margins use the lowest matchup ID, independent of provider ordering. Generation is deterministic and reviewable, not an autonomous intelligence claim.
 - Close means margin **at most `closeMargin`**: admit the squeaker. A narrow edge is not a demolition, landslide or humiliation by invented numbers. The loser can get a character jab without pretending the round was a rout.
 - Standard rounds get a sharp daily receipt, not a fabricated blowout. Ties have no daily winner or loser; do not crown a high-scoring tied team. Incomplete/provisional evidence stays on hold, even if a visible provisional number looks enormous. Missing is not zero. Off-days stay neutral and create no daily points or W/L.
-- Keep DAILY ROUND versus the still-open weekly matchup distinction in normal copy. Weekly context remains separately timestamped and pair/period matched. No claims of a finished weekly win, weekly loss or end-of-day weekly total.
-- Preserve meaningful archived-history chirps: at least three verified daily-round losses/wins in the seven-calendar-day window before the supported recurring joke appears. Use the exact daily count. Missing dates/off-days cannot establish consecutive streaks; never relabel daily-round losses as weekly losses. Keep window/coverage/evidence in the existing trend/data details, not extra story audit paragraphs.
+- Keep the daily-versus-still-open-weekly distinction **once at page level**, using the existing component qualifier. `DAILY ROUND` / `daily rounds` remain allowed as UI labels/topics, not headline, card-title, story or dek prose (including hyphenated forms). Remove filler prefixes and constructions like “in the DAILY ROUND body bag”; do not merely change their case. Do not repeat a not-weekly disclaimer on every card. Weekly context remains separately timestamped and pair/period matched in closed Data details. No claims of a finished weekly win, weekly loss or end-of-day weekly total. Missing/provisional/off-day warnings remain visible and explicit.
+- Preserve meaningful archived-history chirps: at least three verified daily losses/wins in the seven-calendar-day window before the supported recurring joke appears. Use the exact daily count. Limit visible history to at most two brief notes per edition, in stable matchup-ID order, rather than appending the same record commentary to every card. Keep all underlying counts/window/coverage/evidence in existing trend/data details. Missing dates/off-days cannot establish consecutive streaks; never relabel daily losses as weekly losses.
 
 ## Recurring characters, not interchangeable insults
 
@@ -33,14 +33,24 @@ The cast is fictional league characterization layered over real aggregate scores
 
 The latest owner direction specifically asks for Neanderthal references/sounds for the Caveman and robotic/Skynet delivery for Auto Erik. Carry that voice through **both** victory and loss branches, not just a profile heading. Approved lore remains the character source; do not revive superseded bits.
 
+## Variety is part of the contract
+
+The owner's correction was: “These update are the same. Redundang daily rounds. It’s okay in topic. But in the sentence it’s not needed”. A different name, date, number or synonym in the same oven/body-bag/receipt sentence is not a new joke.
+
+- Use separate curated winner-character headline premises, loser-character card premises, and complete win/loss story beats for every approved character. The factual lead names both opponents and the actual margin; `escapes` / `outpoints` / `cooks` or `smokes` express the unchanged score classifications. The following character premise must do the comedic work. No assembly line of “hands X the receipt” or “puts X in the body bag” titles.
+- Story beats vary in **both outcomes**; the Commissioner is not exempt. Keep Neanderthal language and UGG/GRONK/BONK for the Caveman and fictional SYSTEM/STATUS/Skynet delivery for Auto Erik across variants. Preserve the cartoon/imaginary qualifiers on the Juice and IR BOB premises; Ben stays in the complaint department, not MMA; Kyle gets return fire; June Bug stays the polite assassin.
+- Selection is offline and bounded: a stable SHA-256 seed of date, matchup ID, character and copy channel chooses a starting point in a finite curated pool. Scan that pool to avoid gags already selected in the edition or the immediately previous archived edition. Process dates chronologically and matchups by ID, then display newest first; input ordering must not change generated copy. The headline has a separate pool from its own card.
+- The guard tracks complete curated joke text, not rendered aliases or score tokens. If a pool is exhausted, prefer within-edition uniqueness over the adjacent-edition guard. Existing cast pools support the current league's one appearance per character per edition. This is not unlimited novelty: jokes can recur outside the adjacent-edition horizon. New archives or corrected outcomes may change later selections deterministically. Factual result phrasing, status warnings and machine/Stone Age voice markers may recur; recycled punchlines are the problem.
+- Regress actual November 11/12 archive output with aliases/numbers normalized, same-classification cards within an edition, both outcomes for every character, and a third fixture date. Check reruns and reordered sources. Review generated sentences, not just differing template IDs or hashes.
+
 ## Curated examples
 
 These are template examples with illustrative labels/margins, **not additional league results**:
 
-- Blowout: `DAILY ROUND: [winner] cooks [loser] by [verified margin] — somebody unplug the damn oven.`
-- Blowout round: `[loser] brought a participation trophy to a demolition derby.` Follow the score with the actual cast's character beats.
-- Standard: `[loser]’s excuse department is open; the scoreboard is not taking returns.`
-- Close: `[winner] escapes [loser] — DAILY ROUND by [verified margin]`. Admit it is close enough to make the parade embarrassing.
+- Blowout headline: `[winner] cooks [loser] by [verified margin] — GRONK. The cave mural is mostly one very smug stick figure.` Only the Caveman's verified win can select that premise; other winners have their own pools.
+- Commissioner-loss title: `[winner] outpoints The Commissioner — A royal decree meets the shredder.` A narrow result uses `escapes`; a verified smoked result can use `smokes`.
+- Standard title: `[winner] outpoints Auto Erik — SYSTEM: Skynet cannot uninstall the result.`
+- Close story lead: `[winner] edges [loser] by [verified margin]. Close finish.` Follow with selected character beats, not a demolition claim or another daily-versus-weekly disclaimer.
 - Commissioner loss: `Apparently the constitution forgot to award points for being in charge.`
 - Caveman win: `UGG. BONK. The Caveman drags the receipt back to the Stone Age. Neanderthal customer service: every complaint gets an extinction event.`
 - Caveman loss: `GRONK. The Caveman brought a rock to a Wi-Fi problem. Neanderthal tech support has tried BONK and is all out of ideas.`
@@ -57,6 +67,6 @@ Roast fictional league characters and actual verified daily results. No private 
 
 “Learning/adapting” means curating owner-approved examples and feedback here, correcting character beats, and changing deterministic templates with failing-first voice/result regression tests. It does **not** mean model retraining, persistent autonomous learning from images or an inference service running during daily publication. Review the actual generated text, not just the template names. Preserve meaningful history gates and status edge tests when refining humor.
 
-Text-tone approval and image approval are separate. The four November 12 drafts remain private and unapproved. Do not move, reference as approved, commit or publish them because text got sharper. Newly supplied examples are not blanket publication consent. Use only approved catalog artwork/portraits and retain the existing date/scoreContext correction safeguards. No-response still means approved fallback art.
+Text-tone approval and image approval are separate. This copy fix has no pending-image dependency and does not change media selection or the current approved IR BOB hat portrait. Newly supplied examples are not blanket publication consent. Use only approved catalog artwork/portraits and retain the existing date/scoreContext correction safeguards. Future unapproved drafts stay private; no-response still means approved fallback art.
 
 This guide changes neither scoring/source schema nor ESPN authentication, aliases, source bundles or scheduling. The **07:00 Arizona** publication target and existing **05:00 review / 05:45 reminder / 06:00 feedback deadline / 06:30 cutoff** stay as documented in [DAILY-FLOW.md](DAILY-FLOW.md). Reviewed text publication can proceed under the owner's explicit instruction; pending images require their own approval. Technical review, exact-source publication and live verification remain separate gates.

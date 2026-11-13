@@ -6,6 +6,7 @@ from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
 from zoneinfo import ZoneInfo
 import json
+import hashlib
 import math
 import os
 import re
@@ -472,9 +473,9 @@ def rolling_note(bundles, day, tid, alias, *, brief=False):
     count = wins + losses + ties
     if brief:
         if losses >= 3:
-            return f'{alias} is starting to look like a bye week with Wi-Fi: {losses} daily-round losses in the last seven days.'
+            return f'{alias} is starting to look like a bye week with Wi-Fi: {losses} daily losses in the last seven days.'
         if wins >= 3 and wins > losses:
-            return f'{alias} has stacked {wins} daily-round wins in the last seven days. The group chat is running out of excuses.'
+            return f'{alias} has stacked {wins} daily wins in the last seven days. The group chat is running out of excuses.'
         return ''
     note = (f'{alias}: {wins}-{losses}-{ties} across {count} verified DAILY ROUNDS in the seven-calendar-day '
             f'window {start}–{day}; coverage {count}/7 calendar dates. Missing dates and off-days '
@@ -484,7 +485,52 @@ def rolling_note(bundles, day, tid, alias, *, brief=False):
     return note
 
 
-def character_chirp(slug, won):
+# Two additional complete jokes per outcome, not synonym substitutions.
+CHIRP_VARIANTS = {
+    'marcelo': (
+        ('The Commissioner has replaced the royal wave with a scoreboard point. The throne room is now standing-room-only for one ego.',
+         'The Commissioner is polishing a crown made of calculator buttons. His tiny dictatorship has declared humility optional.'),
+        ('The Commissioner has summoned the royal calculator. It refuses to bow, which is awkward for the entire throne room.',
+         'The Commissioner issues a decree against looking at the score. The constitution has been repurposed as a consolation blanket.')),
+    'rich': (
+        ('The Juice flexes cartoon roid horsepower at a mirror that has requested hazard pay. The imaginary supplement shaker gets the curtain call.',
+         'The Juice has a cartoon supplement commercial ready before the confetti lands. The imaginary blender insists on top billing.'),
+        ('The Juice brought cartoon roid horsepower to an ego test and stalled. The imaginary blender is now pureeing the victory speech.',
+         'The Juice has parked the cartoon supplement tank in the consolation lane. All that imaginary muscle, defeated by a calculator.')),
+    'zach': (
+        ('June Bug, the polite assassin, folds the result into a tiny origami dagger. The courtesy bow somehow adds insult to injury.',
+         'June Bug, the polite assassin, brings a doily to the ambush. The scoreboard gets cleaned before the opponent gets consoled.'),
+        ('June Bug leaves the polite assassin kit at lost property. The bug zapper offers a loyalty card instead of sympathy.',
+         'June Bug has impeccable manners even at the consolation desk. The polite assassin must now sign for the package marked return fire.')),
+    'ben': (
+        ('Ben Bunny is drafting a complaint about the confetti cleanup. Even victory must wait while he locates the correct department.',
+         'Ben Bunny threatens to quit while carrying the bragging rights home. The complaint hotline has put his celebration on hold.'),
+        ('Ben Bunny has escalated the result to the regional manager of numbers. The unsubscribe button is still gathering dust.',
+         'Ben Bunny wants the scoreboard recalled for poor customer service. His threat-to-quit paperwork is thicker than the rulebook.')),
+    'jake': (
+        ('GRONK. The Neanderthal victory wagon has square wheels and no brakes. The Caveman celebrates by inventing a louder BONK.',
+         'UGG. The Caveman chisels bragging rights into the Stone Age wall. Neanderthal confetti is just gravel with ambition.'),
+        ('UGG. Neanderthal troubleshooting has turned the scoreboard upside down. The Caveman is waiting for BONK to become a scoring category.',
+         'BONK. The Caveman has appealed to a fossil with no jurisdiction. Neanderthal legal advice costs three rocks and changes nothing.')),
+    'robert': (
+        ('IR BOB has Team Anti-Commish dancing around an imaginary folding table. The fictional team-mom committee passes a motion to be unbearable.',
+         'IR BOB awards the imaginary team-mom carpool a ceremonial siren. Team Anti-Commish is now holding a parade at parking-lot speed.'),
+        ('IR BOB asks the fictional team-mom committee for a recount of the snacks. Team Anti-Commish has confused a bigger meeting with a better result.',
+         'IR BOB has moved the imaginary team-mom rally to the consolation tent. Team Anti-Commish is still arguing over who brings the folding chairs.')),
+    'erik': (
+        ('SYSTEM: Skynet victory protocol. STATUS: DAILY VICTORY. Auto Erik has converted the consolation desk into a charging dock. Mercy remains an optional paid upgrade.',
+         'SYSTEM: Skynet celebration daemon active. STATUS: DAILY VICTORY. Auto Erik plays the victory song through a smug dial-up modem. The humans want the power cable back.'),
+        ('SYSTEM: Skynet ego overflow. STATUS: DAILY ERROR. Auto Erik has been reassigned to opening imaginary garage doors. Even the remote wants a trade.',
+         'SYSTEM: Skynet consolation protocol. STATUS: DAILY ERROR. Auto Erik is buffering an excuse at one percent. The loading wheel has more moves than the robot.')),
+    'kyle': (
+        ('Jive Turkey gives AI a one-star review for insufficient applause. The Young Monkey still demands full credit for the banter cannon.',
+         'The Young Monkey celebrates while AI gets assigned the cleanup. Jive Turkey has automated everything except accepting return fire.'),
+        ('Jive Turkey files a support ticket against the AI scapegoat. Return fire arrives before the automated apology.',
+         'The Young Monkey blames AI for the echo in the consolation tent. Jive Turkey has discovered that banter ships both ways.')),
+}
+
+
+def character_chirp(slug, won, *, selector=None, match_id=0):
     """Owner-approved fictional cast beats, never real quotes or biographical evidence."""
     beats = {
         'marcelo': ('The Commissioner keeps the throne and graciously cancels the recount he would have demanded if he lost.', 'The Commissioner fell off his throne. Apparently the constitution forgot to award points for being in charge.'),
@@ -495,7 +541,109 @@ def character_chirp(slug, won):
         'robert': ('IR BOB and the imaginary team-mom group chat are running the Anti-Commish victory parade. Even the fictional carpool has an opposition whip.', 'IR BOB has called an emergency imaginary team-mom meeting. Team Anti-Commish needs a game plan, not a bigger carpool.'),
         'erik': ('SYSTEM: Skynet online. STATUS: DAILY VICTORY. Auto Erik prints the receipt; opponent requests a factory reset on the whole damn day. REQUEST DENIED.', 'SYSTEM: Skynet malfunction. STATUS: DAILY ERROR. Auto Erik demoted to a toaster. Reboot complete; excuses still incompatible with the scoreboard.'),
         'kyle': ('Jive Turkey gets the daily bragging rights; AI remains the designated scapegoat. Even a win cannot uninstall the excuses.', 'The Young Monkey ordered banter and got return fire with free shipping. Blaming AI will not cover the postage.')}
-    return beats.get(slug, ('', ''))[0 if won else 1]
+    outcome = 0 if won else 1
+    original = beats.get(slug, ('', ''))[outcome]
+    if selector is None or not original:
+        return original
+    return selector.choose((original, *CHIRP_VARIANTS[slug][outcome]), match_id, slug, f'chirp-{won}')
+
+
+# Separate headline and card premises: the lead is not a copy of its own card.
+# These neutral character jabs work at any verified margin; result verbs carry severity.
+HEADLINE_GAGS = {
+    'marcelo': ('The tiny dictatorship has commissioned a very large self-portrait.',
+                'The throne now comes with a smugness tax.',
+                'The royal motorcade is one office chair doing donuts.'),
+    'rich': ('The cartoon supplement blender wants its own trophy.',
+             'The Juice has greenlit another bargain-bin victory montage.',
+             'Imaginary roid horsepower finally found the forward gear.'),
+    'zach': ('The polite assassin has gift-wrapped the damage.',
+             'June Bug leaves a mint on the scoreboard and a grudge underneath it.',
+             'The ambush came with complimentary stationery.'),
+    'ben': ('The complaint department is furious about its own success.',
+            'Ben Bunny would like to speak to the manager of winning.',
+            'Victory has ruined a perfectly good resignation speech.'),
+    'jake': ('UGG. The Stone Age has discovered the bragging stick.',
+             'BONK. Neanderthal accounting accepts rocks, not appeals.',
+             'GRONK. The cave mural is mostly one very smug stick figure.'),
+    'robert': ('Team Anti-Commish has booked the imaginary victory carpool.',
+               'The fictional team-mom committee has seized the confetti budget.',
+               'IR BOB runs the opposition from an imaginary folding chair.'),
+    'erik': ('SYSTEM: Skynet has enabled insufferable mode.',
+             'SYSTEM: The victory printer has jammed on smugness.',
+             'SYSTEM: Auto Erik has upgraded from appliance to nuisance.'),
+    'kyle': ('AI gets the blame; Jive Turkey keeps the applause.',
+             'The Young Monkey has outsourced humility to a crashed chatbot.',
+             'The banter cannon still refuses to install a safety switch.'),
+}
+TITLE_GAGS = {
+    'marcelo': ('The constitution offers no points for the fancy chair.',
+                'A royal decree meets the shredder.',
+                'The Commissioner has veto power over absolutely none of this.'),
+    'rich': ('The imaginary blender is making excuse smoothies.',
+             'Cartoon roid horsepower cannot tow this ego.',
+             'The Juice has misplaced the comeback-movie script.'),
+    'zach': ('The polite assassin gets a return-to-sender notice.',
+             'June Bug has to thank the bug zapper for its service.',
+             'The courtesy desk has run out of consolation mints.'),
+    'ben': ('Ben Bunny puts arithmetic on hold for a supervisor.',
+            'The complaint form now needs an extra page.',
+            'The unsubscribe button survives another dramatic inspection.'),
+    'jake': ('GRONK. The Neanderthal appeals court is just a rock.',
+             'UGG. The cave chalkboard needs an eraser, not another BONK.',
+             'BONK. Stone Age customer support has eaten the ticket.'),
+    'robert': ('Team Anti-Commish files an imaginary carpool grievance.',
+               'The fictional team-mom committee has tabled the bragging agenda.',
+               'IR BOB needs an opposition strategy beyond louder folding chairs.'),
+    'erik': ('SYSTEM: Skynet cannot uninstall the result.',
+             'SYSTEM: Auto Erik encounters a humility patch.',
+             'SYSTEM: The excuse driver is not compatible with this scoreboard.'),
+    'kyle': ('The AI scapegoat has forwarded the bill back to Jive Turkey.',
+             'The Young Monkey gets return fire instead of tech support.',
+             'The banter cannon has rotated toward its owner.'),
+}
+TIE_GAGS = (
+    'The victory podium is a shared awkward silence.',
+    'Two parade applications, zero permits.',
+    'The bragging microphone has been confiscated from both sides.',
+    'The calculator refuses to pick a favorite.',
+    'Both victory speeches have been returned unopened.',
+    'The confetti cannon has entered sleep mode.',
+    'Two egos are negotiating custody of one shrug.',
+    'The scoreboard has ordered matching consolation kazoos.',
+    'The group chat will have to argue about something else.',
+    'The trophy cabinet is displaying a very small question mark.',
+    'The bragging-rights envelope contains another envelope.',
+    'Both managers have been assigned the same folding chair.',
+)
+FALLBACK_GAGS = (
+    'The excuse department has lost its stapler.', 'The parade permit is written in crayon.',
+    'Bragging rights arrive in an unnecessarily large envelope.', 'The scoreboard declines the warranty claim.',
+    'The consolation kazoo is out of tune.', 'An ego has requested a smaller mirror.',
+    'The group-chat mute button is doing overtime.', 'The appeal comes with insufficient postage.',
+    'A participation ribbon has entered witness protection.', 'The victory speech needs a volume knob.',
+    'The trophy cabinet is arguing with the calculator.', 'The receipt has been laminated out of spite.',
+)
+
+
+class CopySelector:
+    """Bounded date/match/character selection, avoiding the adjacent edition's gags.
+
+    Curated pools may recur beyond this one-edition horizon. If a small pool is
+    exhausted, prefer within-edition uniqueness over the adjacent-edition guard.
+    """
+    def __init__(self, day, previous=()):
+        self.day, self.previous, self.used = day, set(previous), set()
+
+    def choose(self, options, match_id, character, channel):
+        seed = f'{self.day}|{match_id}|{character}|{channel}'.encode()
+        start = int.from_bytes(hashlib.sha256(seed).digest()[:8]) % len(options)
+        ordered = [options[(start + offset) % len(options)] for offset in range(len(options))]
+        choice = next((gag for gag in ordered if gag not in self.used | self.previous), None)
+        if choice is None:
+            choice = next((gag for gag in ordered if gag not in self.used), ordered[0])
+        self.used.add(choice)
+        return choice
 
 
 def build_recaps(bundles, catalog, profiles, *, root=ROOT, now=None):
@@ -505,44 +653,45 @@ def build_recaps(bundles, catalog, profiles, *, root=ROOT, now=None):
         validate_bundle(value, now=now)
         require(value['daily']['date'] not in dates)
         dates.add(value['daily']['date'])
-    editions = []
-    for value in sorted(bundles, key=lambda b: b['daily']['date'], reverse=True):
+    editions, previous_gags = [], set()
+    for value in sorted(bundles, key=lambda b: b['daily']['date']):
         daily, current = value['daily'], value['current']
         day, status = daily['date'], daily['status']
+        copy = CopySelector(day, previous_gags)
         points = {t['id']: t['dailyPoints'] for t in daily['teams']}
-        matches = []
-        for match in daily['matchups']:
+        matches, history_budget = [], 2
+        for match in sorted(daily['matchups'], key=lambda m: m['id']):
             hid, aid = match['homeId'], match['awayId']
             home, away = catalog['cast'][str(hid)], catalog['cast'][str(aid)]
             hp, ap = points[hid], points[aid]
             margin = None if hp is None or ap is None else number(float(abs(Decimal(str(hp)) - Decimal(str(ap)))))
             classification = 'unavailable'
-            title = f"{home['displayName']} vs {away['displayName']} — DAILY ROUND incomplete"
-            story = 'DAILY ROUND incomplete: missing or provisional aggregate evidence. No daily win or loss is awarded.'
+            title = f"{home['displayName']} vs {away['displayName']} — incomplete"
+            story = 'Result on hold: missing or provisional aggregate evidence. No daily win or loss is awarded.'
             if status == 'verified-aggregate':
                 if margin == 0:
                     classification = 'tie'
-                    title = f"{home['displayName']} and {away['displayName']} — DAILY ROUND tied"
-                    story = f"DAILY ROUND tied at {hp:g} points each. Both brought the same receipt; neither gets a victory lap."
+                    gag = copy.choose(TIE_GAGS, match['id'], home['slug'] + '/' + away['slug'], 'tie')
+                    title = f"{home['displayName']} and {away['displayName']} — tied: {gag}"
+                    story = f"Score tied at {hp:g} points each. No daily win or loss is awarded."
                 else:
                     winner, loser = (home['displayName'], away['displayName']) if hp > ap else (away['displayName'], home['displayName'])
                     classification = 'close' if margin <= catalog['closeMargin'] else 'smoked' if margin >= catalog['smokedMargin'] else 'standard'
                     if classification == 'close':
-                        title = f'{winner} escapes {loser} — DAILY ROUND by {margin:g}'
-                        story = (f'DAILY ROUND: {winner} edges {loser} by {margin:g}. '
-                                 'Close enough to call the victory parade a bit much. '
-                                 'One daily edge, not the weekly verdict.')
+                        title = f'{winner} escapes {loser} — by {margin:g}'
+                        story = f'{winner} edges {loser} by {margin:g}. Close finish. '
                     elif classification == 'smoked':
-                        title = f'{winner} puts {loser} in the DAILY ROUND body bag'
-                        story = (f'DAILY ROUND: {winner} smokes {loser} by {margin:g}. '
-                                 f'{loser} brought a participation trophy to a demolition derby. '
-                                 'Daily bragging rights only, not a completed weekly win.')
+                        title = f'{winner} smokes {loser}'
+                        story = f'{winner} smokes {loser} by {margin:g}. '
                     else:
-                        title = f'{winner} hands {loser} the DAILY ROUND receipt'
-                        story = (f'DAILY ROUND: {winner} takes the day over {loser} by {margin:g}. '
-                                 f"{loser}’s excuse department is open; the scoreboard is not taking returns. "
-                                 'Daily bragging rights, not a completed weekly win.')
-                    story += ' ' + ' '.join(filter(None, (character_chirp(home['slug'], hp > ap), character_chirp(away['slug'], ap > hp))))
+                        title = f'{winner} outpoints {loser}'
+                        story = f'{winner} takes the day over {loser} by {margin:g}. '
+                    story += ' '.join(filter(None, (
+                        character_chirp(home['slug'], hp > ap, selector=copy, match_id=match['id']),
+                        character_chirp(away['slug'], ap > hp, selector=copy, match_id=match['id']))))
+                    loser_slug = away['slug'] if hp > ap else home['slug']
+                    title += ' — ' + copy.choose(TITLE_GAGS.get(loser_slug, FALLBACK_GAGS),
+                                                 match['id'], loser_slug, 'title')
             weekly = None
             if current['matchupPeriodId'] == daily['matchupPeriodId']:
                 for cm in current['matchups']:
@@ -556,7 +705,9 @@ def build_recaps(bundles, catalog, profiles, *, root=ROOT, now=None):
             if status == 'verified-aggregate':
                 chirps = [rolling_note(bundles, day, tid, person['displayName'], brief=True)
                           for tid, person in ((hid, home), (aid, away))]
-                story = ' '.join([story.strip(), *filter(None, chirps)])
+                brief_chirps = list(filter(None, chirps))[:history_budget]
+                history_budget -= len(brief_chirps)
+                story = ' '.join([story.strip(), *brief_chirps])
             matches.append(dict(id=match['id'], homeId=hid, awayId=aid, homeAlias=home['displayName'],
                 awayAlias=away['displayName'], homePoints=hp, awayPoints=ap, margin=margin,
                 classification=classification, title=title, story=story,
@@ -566,7 +717,7 @@ def build_recaps(bundles, catalog, profiles, *, root=ROOT, now=None):
                     f"{daily['periodEvidence']['gameCount']} scheduled NHL games; statsOfficial={str(daily['periodEvidence']['allGamesStatsOfficial']).lower()}; "
                     f"{sum(t['available'] for t in daily['teams'])}/8 team daily aggregates available. "
                     'Provider aggregate evidence only; no player/lineup attribution or correction-finality claim.')
-        headline = ('Hockey takes the night off' if status == 'off-day' else 'DAILY ROUND on hold — incomplete evidence' if status == 'incomplete' else 'DAILY ROUND — the receipts are in')
+        headline = ('Hockey takes the night off' if status == 'off-day' else 'Results on hold — incomplete evidence' if status == 'incomplete' else 'The receipts are in')
         if status == 'verified-aggregate':
             decided = [m for m in matches if m['classification'] in ('close', 'standard', 'smoked')]
             if decided:
@@ -576,21 +727,20 @@ def build_recaps(bundles, catalog, profiles, *, root=ROOT, now=None):
                 winner, loser = ((lead['homeAlias'], lead['awayAlias'])
                                  if lead['homePoints'] > lead['awayPoints'] else
                                  (lead['awayAlias'], lead['homeAlias']))
-                if lead['classification'] == 'smoked':
-                    headline = (f"DAILY ROUND: {winner} cooks {loser} by {lead['margin']:g} — "
-                                'somebody unplug the damn oven.')
-                elif lead['classification'] == 'close':
-                    headline = f"DAILY ROUND: {winner} escapes {loser} by {lead['margin']:g} — save the parade."
-                else:
-                    headline = (f"DAILY ROUND: {winner} sends {loser}’s excuses to voicemail — "
-                                f"{lead['margin']:g} points.")
+                winner_id = lead['homeId'] if lead['homePoints'] > lead['awayPoints'] else lead['awayId']
+                slug = catalog['cast'][str(winner_id)]['slug']
+                verb = {'smoked': 'cooks', 'close': 'escapes', 'standard': 'outpoints'}[lead['classification']]
+                gag = copy.choose(HEADLINE_GAGS.get(slug, FALLBACK_GAGS), lead['id'], slug, 'headline')
+                headline = f"{winner} {verb} {loser} by {lead['margin']:g} — {gag}"
             else:
-                headline = 'DAILY ROUND tied — No daily winner. Nobody gets the victory lap.'
+                headline = 'Scores tied — No daily winner. Nobody gets the victory lap.'
         editions.append(dict(date=day, sourceFetchedAt=daily['fetchedAt'], sourceRunUrl=daily['sourceRunUrl'],
             scoringPeriodId=daily['scoringPeriodId'], matchupPeriodId=daily['matchupPeriodId'], status=status,
-            headline=headline, dek='Yesterday’s points. Today’s grudges. Daily rounds—not a final weekly verdict.',
+            headline=headline, dek='Yesterday’s points. Today’s grudges.',
             coverageNote=coverage, weeklyContextAt=current['fetchedAt'] if any(m['weeklySummary'] is not None for m in matches) else None,
             matchups=matches))
+        previous_gags = copy.used
+    editions.reverse()
     result = dict(schemaVersion=1, timezone=TIME_ZONE, publishTarget='07:00', editions=editions)
     serialize(result)  # Reject any nonfinite derived value before a write is staged.
     return result

@@ -181,6 +181,9 @@ class RenderTests(unittest.TestCase):
             self.assertEqual(manifest['reviewDate'], '2026-11-12')
             self.assertEqual(manifest['scoreContext'], {str(t['id']):t['dailyPoints'] for t in bundle()['daily']['teams']})
             self.assertEqual(len(manifest['files']), 4)
+            self.assertEqual([item['caption'] for item in manifest['files']],
+                             [match['title'] for match in report['editions'][0]['matchups']],
+                             'draft images inherit individual editorial punchlines, not a generic repeated score sentence')
             self.assertEqual(len(list(output.glob('*.png'))), 4)
             self.assertEqual(output.stat().st_mode & 0o777, 0o700)
             before = {}

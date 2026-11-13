@@ -4,6 +4,7 @@ from contextlib import redirect_stdout, redirect_stderr
 from datetime import datetime, timezone
 import io
 import json
+import re
 from pathlib import Path
 import tempfile
 import unittest
@@ -276,6 +277,139 @@ class EditorialTests(unittest.TestCase):
             return pipeline.build_recaps(bundles, editorial() if catalog is None else catalog,
                                          pipeline.read_json(root / 'src/data/clubhouse.json'), root=root, now=NOW)
 
+    def test_story_chirps_vary_for_every_character_in_both_outcomes(self):
+        root = pipeline.ROOT
+        catalog = pipeline.read_json(root / 'src/data/editorial.json')
+        profiles = pipeline.read_json(root / 'src/data/clubhouse.json')
+        now = datetime(2026, 11, 16, 12, tzinfo=timezone.utc)
+        archived = [pipeline.validate_bundle(pipeline.read_json(root / 'src/data/daily' / (day + '.json')), now=now)
+                    for day in ('2026-11-11', '2026-11-12')]
+        for home_wins in (True, False):
+            values = []
+            for day in ('2026-11-11', '2026-11-12', '2026-11-13'):
+                value = copy.deepcopy(archived[0])
+                value['daily'].update(date=day, fetchedAt='2026-11-14T12:00:00Z')
+                scores = {}
+                for match in value['daily']['matchups']:
+                    scores[match['homeId']] = 10 if home_wins else 0
+                    scores[match['awayId']] = 0 if home_wins else 10
+                for team in value['daily']['teams']:
+                    team['dailyPoints'] = scores[team['id']]
+                values.append(value)
+            report = pipeline.build_recaps(values, catalog, profiles, root=root, now=now)
+            previous, previous_sentences = {}, set()
+            for edition in reversed(report['editions']):
+                self.assertLessEqual(sum(m['story'].count('last seven days') for m in edition['matchups']), 2)
+                current, sentences = {}, set()
+                for match in edition['matchups']:
+                    self.assertNotRegex(match['title'], r'hands .* the receipt|puts .* in the .*body bag')
+                    # The score lead is factual and can recur; the following cast gags cannot.
+                    body = match['story'].split('. ', 1)[1]
+                    self.assertNotEqual(body, previous.get(match['id']))
+                    current[match['id']] = body
+                    for sentence in body.split('. '):
+                        for person in catalog['cast'].values():
+                            sentence = sentence.replace(person['displayName'], '<cast>')
+                        if len(sentence.split()) >= 5 and 'last seven days' not in sentence:
+                            normalized = ' '.join(sentence.casefold().split())
+                            self.assertNotIn(normalized, sentences)
+                            self.assertNotIn(normalized, previous_sentences)
+                            sentences.add(normalized)
+                    for tid in (match['homeId'], match['awayId']):
+                        slug = catalog['cast'][str(tid)]['slug']
+                        if slug == 'jake':
+                            self.assertIn('Neanderthal', body)
+                            self.assertRegex(body, r'\b(UGG|GRONK|BONK)\b')
+                        if slug == 'erik':
+                            for token in ('SYSTEM:', 'STATUS:', 'Skynet'):
+                                self.assertIn(token, body)
+                        for forbidden in ('MMA', 'wife', 'husband', 'weekly losses', 'consecutive'):
+                            self.assertNotIn(forbidden, body)
+                self.assertEqual(len(current), len(set(current.values())))
+                previous, previous_sentences = current, sentences
+        # Real editions must vary the same returning character, not just the fixture scores.
+        editions = pipeline.build_recaps(archived, catalog, profiles, root=root, now=now)['editions']
+        bodies = [{m['id']: m['story'].split('. ', 1)[1] for m in e['matchups']} for e in editions]
+        for mid in bodies[0].keys() & bodies[1].keys():
+            self.assertNotEqual(bodies[0][mid], bodies[1][mid])
+
+    def test_curated_gags_do_not_repeat_across_archives_or_same_day(self):
+        root = pipeline.ROOT
+        catalog = pipeline.read_json(root / 'src/data/editorial.json')
+        profiles = pipeline.read_json(root / 'src/data/clubhouse.json')
+        now = datetime(2026, 11, 16, 12, tzinfo=timezone.utc)
+        archived = [pipeline.validate_bundle(pipeline.read_json(root / 'src/data/daily' / (day + '.json')), now=now)
+                    for day in ('2026-11-11', '2026-11-12')]
+        self.assertEqual(sorted(b['daily']['date'] for b in archived), ['2026-11-11', '2026-11-12'])
+
+        def normalized(text):
+            for alias in sorted([p['displayName'] for p in catalog['cast'].values()], key=len, reverse=True):
+                text = text.replace(alias, '<cast>')
+            text = re.sub(r'\d+(?:\.\d+)?', '<n>', text)
+            return ' '.join(text.casefold().split())
+
+        def assert_variety(values):
+            report = pipeline.build_recaps(values, catalog, profiles, root=root, now=now)
+            previous = set()
+            for edition in reversed(report['editions']):
+                # Compare actual rendered gags, not dates, aliases, scores or template IDs.
+                titles = [normalized(m['title']) for m in edition['matchups']]
+                self.assertEqual(len(titles), len(set(titles)), titles)
+                gags = {normalized(edition['headline']), *titles}
+                self.assertFalse(gags & previous, gags & previous)
+                previous = gags
+            reordered = copy.deepcopy(values[::-1])
+            for value in reordered:
+                value['daily']['matchups'].reverse()
+                value['daily']['teams'].reverse()
+                value['current']['matchups'].reverse()
+            self.assertEqual(report, pipeline.build_recaps(reordered, catalog, profiles, root=root, now=now))
+            self.assertEqual(report, pipeline.build_recaps(values, catalog, profiles, root=root, now=now))
+
+        assert_variety(archived)
+        third = copy.deepcopy(archived[-1])
+        third['daily'].update(date='2026-11-13', fetchedAt='2026-11-14T12:00:00Z')
+        for margin in (1, 10, 30):
+            # Every card has the same classification; alias swaps cannot pass.
+            values = copy.deepcopy([*archived, third])
+            for value in values:
+                for match in value['daily']['matchups']:
+                    for team in value['daily']['teams']:
+                        team['dailyPoints'] = margin if team['id'] == match['homeId'] else team['dailyPoints']
+                        if team['id'] == match['awayId']:
+                            team['dailyPoints'] = 0
+            with self.subTest(margin=margin):
+                assert_variety(values)
+
+    def test_normal_prose_is_clean_in_every_evidence_state(self):
+        variants = []
+        for scores in ([30, 0, 15, 5, 5, 4, 2, 2], [2] * 8):
+            data = bundle()
+            for team, points in zip(data['daily']['teams'], scores):
+                team['dailyPoints'] = points
+            variants.append(data)
+        for missing in (True, False):
+            data = bundle(); data['daily']['status'] = 'incomplete'
+            if missing:
+                data['daily']['teams'][0].update(dailyPoints=None, available=False, pointSource=None)
+            else:
+                data['daily']['periodEvidence']['allGamesStatsOfficial'] = False
+            variants.append(data)
+        data = bundle()
+        data['daily'].update(status='off-day', scoringPeriodId=None, matchupPeriodId=None,
+                            matchups=[], periodEvidence=dict(gameCount=0, allGamesStatsOfficial=False))
+        for team in data['daily']['teams']:
+            team.update(dailyPoints=None, available=False, pointSource=None)
+        variants.append(data)
+        for data in variants:
+            edition = self.report([data])['editions'][0]
+            prose = [edition['headline'], edition['dek']]
+            prose += [m[field] for m in edition['matchups'] for field in ('title', 'story')]
+            with self.subTest(status=edition['status'], headline=edition['headline']):
+                for text in prose:
+                    self.assertNotRegex(text.lower(), r'daily[ -]rounds?')
+                    self.assertNotRegex(text.lower(), r'(not .*weekly|weekly verdict|weekly win)')
+
     def test_largest_verified_daily_blowout_names_winner_loser_and_actual_margin(self):
         data = bundle()
         # Highest scorer has a close game; the away winner has the biggest rout.
@@ -285,7 +419,7 @@ class EditorialTests(unittest.TestCase):
         self.assertIn('Alias 4', edition['headline'])
         self.assertIn('Alias 3', edition['headline'])
         self.assertIn('35.5', edition['headline'])
-        self.assertIn('DAILY ROUND', edition['headline'])
+        self.assertNotIn('DAILY ROUND', edition['headline'])
         self.assertNotIn('Alias 1', edition['headline'])
         self.assertNotIn('brought the heat', edition['headline'])
         self.assertEqual(edition, self.report([data])['editions'][0])
@@ -298,11 +432,11 @@ class EditorialTests(unittest.TestCase):
         self.assertEqual(match['classification'], 'smoked')
         self.assertIn('Alias 2', match['title'])
         self.assertIn('Alias 1', match['title'])
-        self.assertIn('body bag', match['title'])
-        self.assertIn('DAILY ROUND', match['title'])
+        self.assertIn('smokes', match['title'])
+        self.assertNotIn('DAILY ROUND', match['title'])
         self.assertIn('28.25', match['story'])
-        self.assertIn('participation trophy', match['story'])
-        self.assertIn('not a completed weekly win', match['story'])
+        self.assertIn('smokes', match['story'])
+        self.assertNotIn('weekly win', match['story'])
         self.assertNotIn('coverage', match['story'])
 
     def test_approved_cast_gets_sharp_win_and_loss_beats_not_new_personal_dirt(self):
@@ -341,13 +475,15 @@ class EditorialTests(unittest.TestCase):
             for match in edition['matchups']:
                 with self.subTest(home_wins=home_wins, match=match['id']):
                     self.assertEqual(match['classification'], 'standard')
-                    self.assertIn('excuse department', match['story'])
+                    self.assertIn('takes the day over', match['story'])
                     self.assertNotIn(' vs ', match['title'])
                     self.assertNotIn('body bag', match['title'])
                     self.assertIn('10', match['story'])
                     for field, won in (('homeId', home_wins), ('awayId', not home_wins)):
                         person = catalog['cast'][str(match[field])]
-                        self.assertIn(pipeline.character_chirp(person['slug'], won), match['story'])
+                        options = (pipeline.character_chirp(person['slug'], won),
+                                   *pipeline.CHIRP_VARIANTS[person['slug']][0 if won else 1])
+                        self.assertTrue(any(chirp in match['story'] for chirp in options))
 
     def test_close_round_headline_and_story_admit_a_squeaker_not_a_demolition(self):
         data = bundle()
@@ -361,7 +497,7 @@ class EditorialTests(unittest.TestCase):
         match = edition['matchups'][0]
         self.assertIn('escapes', match['title'])
         self.assertIn('Close', match['story'])
-        self.assertIn('parade', match['story'])
+        self.assertIn('Close finish', match['story'])
         for text in (edition['headline'], match['title'], match['story']):
             for forbidden in ('smokes', 'body bag', 'demolition', 'cooks', 'landslide'):
                 self.assertNotIn(forbidden, text)
@@ -374,9 +510,24 @@ class EditorialTests(unittest.TestCase):
         self.assertIn('Alias 4', headline)
         self.assertIn('Alias 3', headline)
         self.assertIn('19.75', headline)
-        self.assertIn('voicemail', headline)
+        self.assertIn('outpoints', headline)
         self.assertNotIn('Alias 1', headline)
         self.assertNotIn('cooks', headline)
+
+    def test_ties_get_distinct_neutral_card_jokes_without_awarding_results(self):
+        data = bundle()
+        for team in data['daily']['teams']:
+            team['dailyPoints'] = 2
+        editions = self.report([data])['editions']
+        for edition in editions:
+            titles = []
+            for match in edition['matchups']:
+                title = re.sub(r'Alias \d+', '<cast>', match['title'])
+                titles.append(title)
+                self.assertEqual(match['classification'], 'tie')
+                self.assertIn('tied', match['story'])
+                self.assertNotIn('Both brought the same receipt', match['story'])
+            self.assertEqual(len(titles), len(set(titles)))
 
     def test_tied_rounds_keep_headline_neutral_even_with_different_pair_totals(self):
         data = bundle()
@@ -439,7 +590,7 @@ class EditorialTests(unittest.TestCase):
         headline = self.report([data], catalog=catalog)['editions'][0]['headline']
         self.assertIn('Alias 1', headline)
         self.assertIn('Alias 2', headline)
-        self.assertIn('voicemail', headline)
+        self.assertIn('outpoints', headline)
         self.assertNotIn('cooks', headline)
         catalog['closeMargin'] = 20
         self.assertIn('escapes', self.report([data], catalog=catalog)['editions'][0]['headline'])
@@ -455,8 +606,8 @@ class EditorialTests(unittest.TestCase):
             self.assertNotIn('bye week', story)
             self.assertNotIn('stacked', story)
         story = self.report(history)['editions'][0]['matchups'][0]['story']
-        self.assertIn('3 daily-round losses', story)
-        self.assertIn('3 daily-round wins', story)
+        self.assertIn('3 daily losses', story)
+        self.assertIn('3 daily wins', story)
         for forbidden in ('weekly losses', 'consecutive', 'streak', 'coverage', 'calendar dates'):
             self.assertNotIn(forbidden, story)
 
@@ -493,7 +644,7 @@ class EditorialTests(unittest.TestCase):
         match = edition['matchups'][0]
         self.assertEqual(set(match), set('id homeId awayId homeAlias awayAlias homePoints awayPoints margin classification title story trendNotes weeklySummary meme'.split()))
         self.assertEqual(set(match['meme']), set('id image caption sourceDate isArchive approvalStatus'.split()))
-        self.assertIn('DAILY ROUND', match['story'])
+        self.assertNotIn('DAILY ROUND', match['story'])
         self.assertNotIn('Canonical', json.dumps(result))
         self.assertNotIn('ESPN Team', json.dumps(result))
         self.assertEqual(match['homeAlias'], 'Alias 1')
@@ -521,7 +672,7 @@ class EditorialTests(unittest.TestCase):
             history.append(data)
         story=self.report(history)['editions'][0]['matchups'][0]['story']
         self.assertIn('bye week with Wi-Fi',story)
-        self.assertIn('3 daily-round losses',story)
+        self.assertIn('3 daily losses',story)
         self.assertNotIn('coverage',story)
         self.assertNotIn('1/7',story)
 

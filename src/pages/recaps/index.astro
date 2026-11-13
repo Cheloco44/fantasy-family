@@ -10,7 +10,7 @@ const stamp = value => new Intl.DateTimeFormat('en-US', { timeZone: 'America/Pho
   {recaps.editions.length === 0 && <p>No daily editions are available. The sample below is not actual league performance.</p>}
   <div class="recap-list">{recaps.editions.map((edition, i) => <article class="recap-entry" data-recap-date={i === 0 ? edition.date : undefined}>
     <div class="eyebrow"><time datetime={edition.date}>{edition.date}</time> · {edition.status === 'verified-aggregate' ? 'VERIFIED TEAM AGGREGATES' : edition.status === 'off-day' ? 'OFF-DAY' : 'INCOMPLETE'}</div>
-    <h2><a href={`${base}recaps/${edition.date}/`}>{edition.headline}</a></h2><p>{edition.dek}</p>
+    <h2><a href={`${base}recaps/${edition.date}/`}>{edition.headline}</a></h2>
     {edition.status !== 'verified-aggregate' && <p class="freshness-warning" role="status">{edition.status === 'off-day' ? 'No NHL games scheduled for this Arizona date.' : 'Daily scores are incomplete. Missing scores are unavailable, not zero.'}</p>}
     <p class="small muted">Updated <time datetime={edition.sourceFetchedAt}>{stamp(edition.sourceFetchedAt)} AZ</time> · DAILY ROUND</p>
     {i === 0 && <p class="freshness-warning" data-recap-stale hidden role="status">The latest edition is older than yesterday in Arizona. Publication may be delayed or a refresh may have failed. Last successful data is preserved.</p>}
