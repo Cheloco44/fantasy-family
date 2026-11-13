@@ -134,6 +134,24 @@
         "5": 61.25,
         "2": 40.0
       }
+    },
+    {
+      "id": "nov12-05-irbob-skynet",
+      "image": "memes/approved/05-irbob-skynet.jpg",
+      "caption": "UNSUBSCRIBE. Skynet had a plan. IR BOB removed it from the group chat.",
+      "date": "2026-11-12",
+      "managers": [
+        "robert",
+        "erik"
+      ],
+      "tags": [
+        "2026-27",
+        "nov12",
+        "rivalry",
+        "fictional-banter"
+      ],
+      "approvalStatus": "approved",
+      "contextType": "evergreen"
     }
   ]
 }
