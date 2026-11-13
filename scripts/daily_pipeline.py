@@ -487,14 +487,14 @@ def rolling_note(bundles, day, tid, alias, *, brief=False):
 def character_chirp(slug, won):
     """Owner-approved fictional cast beats, never real quotes or biographical evidence."""
     beats = {
-        'marcelo': ('The throne survives. The Commissioner will still call it a landslide.', 'The throne took a body shot. Emergency rule changes are being drafted in the fictional front office.'),
-        'rich': ('The Juice has enough imaginary horsepower to power the victory parade.', 'All that juice, and the comeback movie still needs a new ending.'),
-        'zach': ('June Bug sends a polite notification that the other manager lost.', 'The polite assassin has temporarily become the bug-zapper demonstration.'),
-        'ben': ('For once the score went his way. Ben now needs something else to complain about.', 'Ben has filed a complaint with the entire universe. Resignation paperwork remains unsigned.'),
-        'jake': ('The Stone Age does not do excuses. The Caveman has kept the receipt.', 'The Caveman is inspecting the scoreboard for something he can fix with a rock.'),
-        'robert': ('Team Anti-Commish is celebrating. The imaginary team-mom group chat has taken over the meeting.', 'IR BOB is recruiting imaginary team-mom reinforcements. Team Anti-Commish is not disbanding.'),
-        'erik': ('Auto Erik has discovered the victory button. Nobody touch the settings.', 'Skynet needs a reboot. Tech support has left the chat.'),
-        'kyle': ('Jive Turkey won the day. Somehow AI is still getting blamed for something.', 'The Young Monkey dishes it out; the return fire came with interest. AI is receiving the blame.')}
+        'marcelo': ('The Commissioner keeps the throne and graciously cancels the recount he would have demanded if he lost.', 'The Commissioner fell off his throne. Apparently the constitution forgot to award points for being in charge.'),
+        'rich': ('The Juice turns cartoon supplement horsepower into bragging rights. The imaginary blender has a better agent than the manager.', 'All that cartoon roid horsepower and The Juice still needs a jump-start. The comeback movie went straight to the bargain bin.'),
+        'zach': ('June Bug, the polite assassin, sends a thank-you card with the daily receipt. Somehow the manners make it worse.', 'June Bug met the bug zapper. Impeccable manners; absolutely no refund on the result.'),
+        'ben': ('Ben won and still needs something to complain about. Somebody get this man a refund for the inconvenience of winning.', 'Ben has filed a complaint against arithmetic. The threat to quit is ready; the unsubscribe button remains untouched.'),
+        'jake': ('UGG. BONK. The Caveman drags the receipt back to the Stone Age. Neanderthal customer service: every complaint gets an extinction event.', 'GRONK. The Caveman brought a rock to a Wi-Fi problem. Neanderthal tech support has tried BONK and is all out of ideas.'),
+        'robert': ('IR BOB and the imaginary team-mom group chat are running the Anti-Commish victory parade. Even the fictional carpool has an opposition whip.', 'IR BOB has called an emergency imaginary team-mom meeting. Team Anti-Commish needs a game plan, not a bigger carpool.'),
+        'erik': ('SYSTEM: Skynet online. STATUS: DAILY VICTORY. Auto Erik prints the receipt; opponent requests a factory reset on the whole damn day. REQUEST DENIED.', 'SYSTEM: Skynet malfunction. STATUS: DAILY ERROR. Auto Erik demoted to a toaster. Reboot complete; excuses still incompatible with the scoreboard.'),
+        'kyle': ('Jive Turkey gets the daily bragging rights; AI remains the designated scapegoat. Even a win cannot uninstall the excuses.', 'The Young Monkey ordered banter and got return fire with free shipping. Blaming AI will not cover the postage.')}
     return beats.get(slug, ('', ''))[0 if won else 1]
 
 
@@ -517,21 +517,31 @@ def build_recaps(bundles, catalog, profiles, *, root=ROOT, now=None):
             hp, ap = points[hid], points[aid]
             margin = None if hp is None or ap is None else number(float(abs(Decimal(str(hp)) - Decimal(str(ap)))))
             classification = 'unavailable'
-            title = f"{home['displayName']} vs {away['displayName']} — DAILY ROUND"
+            title = f"{home['displayName']} vs {away['displayName']} — DAILY ROUND incomplete"
             story = 'DAILY ROUND incomplete: missing or provisional aggregate evidence. No daily win or loss is awarded.'
             if status == 'verified-aggregate':
                 if margin == 0:
                     classification = 'tie'
+                    title = f"{home['displayName']} and {away['displayName']} — DAILY ROUND tied"
                     story = f"DAILY ROUND tied at {hp:g} points each. Both brought the same receipt; neither gets a victory lap."
                 else:
                     winner, loser = (home['displayName'], away['displayName']) if hp > ap else (away['displayName'], home['displayName'])
                     classification = 'close' if margin <= catalog['closeMargin'] else 'smoked' if margin >= catalog['smokedMargin'] else 'standard'
                     if classification == 'close':
-                        story = f'DAILY ROUND: {winner} edges {loser} by {margin:g}. Close enough to keep the group chat arguing; not close enough to split the bragging rights.'
+                        title = f'{winner} escapes {loser} — DAILY ROUND by {margin:g}'
+                        story = (f'DAILY ROUND: {winner} edges {loser} by {margin:g}. '
+                                 'Close enough to call the victory parade a bit much. '
+                                 'One daily edge, not the weekly verdict.')
                     elif classification == 'smoked':
-                        story = f'DAILY ROUND: {winner} smokes {loser} by {margin:g}. That was not a victory lap; that was a tow truck. Daily bragging rights only, not a completed weekly win.'
+                        title = f'{winner} puts {loser} in the DAILY ROUND body bag'
+                        story = (f'DAILY ROUND: {winner} smokes {loser} by {margin:g}. '
+                                 f'{loser} brought a participation trophy to a demolition derby. '
+                                 'Daily bragging rights only, not a completed weekly win.')
                     else:
-                        story = f'DAILY ROUND: {winner} takes the day over {loser} by {margin:g}. One daily receipt for the group chat, not a completed weekly win.'
+                        title = f'{winner} hands {loser} the DAILY ROUND receipt'
+                        story = (f'DAILY ROUND: {winner} takes the day over {loser} by {margin:g}. '
+                                 f"{loser}’s excuse department is open; the scoreboard is not taking returns. "
+                                 'Daily bragging rights, not a completed weekly win.')
                     story += ' ' + ' '.join(filter(None, (character_chirp(home['slug'], hp > ap), character_chirp(away['slug'], ap > hp))))
             weekly = None
             if current['matchupPeriodId'] == daily['matchupPeriodId']:
@@ -558,10 +568,24 @@ def build_recaps(bundles, catalog, profiles, *, root=ROOT, now=None):
                     'Provider aggregate evidence only; no player/lineup attribution or correction-finality claim.')
         headline = ('Hockey takes the night off' if status == 'off-day' else 'DAILY ROUND on hold — incomplete evidence' if status == 'incomplete' else 'DAILY ROUND — the receipts are in')
         if status == 'verified-aggregate':
-            best = max(points.values())
-            leaders = [tid for tid, value in points.items() if value == best]
-            headline = (f"{catalog['cast'][str(leaders[0])]['displayName']} brought the heat. The excuses followed."
-                        if len(leaders) == 1 else 'Same ice. New grudges. Keep the receipts.')
+            decided = [m for m in matches if m['classification'] in ('close', 'standard', 'smoked')]
+            if decided:
+                # Largest actual daily margin leads, never the highest individual total.
+                # Equal margins use the lowest matchup ID, independent of source ordering.
+                lead = max(decided, key=lambda m: (m['margin'], -m['id']))
+                winner, loser = ((lead['homeAlias'], lead['awayAlias'])
+                                 if lead['homePoints'] > lead['awayPoints'] else
+                                 (lead['awayAlias'], lead['homeAlias']))
+                if lead['classification'] == 'smoked':
+                    headline = (f"DAILY ROUND: {winner} cooks {loser} by {lead['margin']:g} — "
+                                'somebody unplug the damn oven.')
+                elif lead['classification'] == 'close':
+                    headline = f"DAILY ROUND: {winner} escapes {loser} by {lead['margin']:g} — save the parade."
+                else:
+                    headline = (f"DAILY ROUND: {winner} sends {loser}’s excuses to voicemail — "
+                                f"{lead['margin']:g} points.")
+            else:
+                headline = 'DAILY ROUND tied — No daily winner. Nobody gets the victory lap.'
         editions.append(dict(date=day, sourceFetchedAt=daily['fetchedAt'], sourceRunUrl=daily['sourceRunUrl'],
             scoringPeriodId=daily['scoringPeriodId'], matchupPeriodId=daily['matchupPeriodId'], status=status,
             headline=headline, dek='Yesterday’s points. Today’s grudges. Daily rounds—not a final weekly verdict.',
