@@ -361,6 +361,181 @@ class NotificationTests(unittest.TestCase):
             self.assertFalse((Path(directory)/'private').exists())
 
 
+class MemePromptTests(unittest.TestCase):
+    """ChatGPT-style meme prompts delivered with the reviewed 05:00 packet."""
+
+    def edition(self, matchups):
+        return dict(date='2026-11-11', status='verified-aggregate', headline='The receipts are in',
+                    dek='', coverageNote='', matchups=matchups)
+
+    def matchup(self, mid, home, away, hp, ap, classification, margin):
+        return dict(id=mid, homeId=home, awayId=away,
+                    homeAlias=f"Person {home}", awayAlias=f"Person {away}",
+                    homePoints=hp, awayPoints=ap, margin=margin,
+                    classification=classification, title='some editorial title', story='some story')
+
+    def decided(self):
+        # Four decided matchups; margins descending: 90(smoked), 20(smoked), 8(standard), 5(close).
+        return [
+            self.matchup(1, 1, 2, 100, 10, 'smoked', 90),
+            self.matchup(2, 3, 4, 60, 40, 'smoked', 20),
+            self.matchup(3, 5, 6, 30, 22, 'standard', 8),
+            self.matchup(4, 7, 8, 15, 10, 'close', 5),
+        ]
+
+    def test_no_decided_matchups_return_single_evergreen_fallback(self):
+        self.assertTrue(callable(getattr(packet, 'meme_prompts', None)), 'meme prompt builder missing')
+        for classification in ('tie', 'unavailable'):
+            with self.subTest(classification=classification):
+                edition = self.edition([self.matchup(1, 1, 2, 10, 10, classification, 0)])
+                prompts = packet.meme_prompts(edition, editorial())
+                self.assertEqual(len(prompts), 1)
+        # An empty edition (off-day / incomplete) also falls back.
+        self.assertEqual(len(packet.meme_prompts(self.edition([]), editorial())), 1)
+
+    def test_evergreen_fallback_names_cast_display_names_and_styles_scene(self):
+        prompt = packet.meme_prompts(self.edition([]), editorial())[0]
+        self.assertIn('Alias 6', prompt)          # exact catalog displayNames, not slugs
+        self.assertIn('Alias 7', prompt)
+        self.assertIn('one full scene', prompt.lower())
+        self.assertIn('not a collage', prompt.lower())
+        self.assertIn('caption', prompt.lower())
+        self.assertNotIn('person-6', prompt)      # slugs never leak into prompt text
+
+    def test_decided_matchups_take_largest_margins_first_up_to_three(self):
+        prompts = packet.meme_prompts(self.edition(self.decided()), editorial())
+        self.assertEqual(len(prompts), 3)          # cap: 90, 20, 8 (8-margin standard before 5 close)
+        joined = '\n'.join(prompts)
+        self.assertLess(joined.index('Alias 1'), joined.index('Alias 3'))
+        self.assertLess(joined.index('Alias 3'), joined.index('Alias 5'))
+
+    def test_cap_at_three_ignores_extra_decided(self):
+        extra = [self.matchup(5, 1, 2, 70, 5, 'smoked', 65),
+                 self.matchup(6, 3, 4, 50, 10, 'smoked', 40)]
+        edition = self.edition(self.decided() + extra)
+        self.assertEqual(len(packet.meme_prompts(edition, editorial())), 3)
+
+    def test_deterministic_across_matchup_order(self):
+        forward = self.decided()
+        reversed_edition = self.edition(list(reversed(forward)))
+        self.assertEqual(packet.meme_prompts(self.edition(forward), editorial()),
+                         packet.meme_prompts(reversed_edition, editorial()))
+
+    def test_prompts_name_real_pairing_no_invented_numbers_no_embedded_caption(self):
+        for match, prompt in zip(self.decided(), packet.meme_prompts(self.edition(self.decided()), editorial())):
+            cast = editorial()['cast']
+            home, away = cast[str(match['homeId'])]['displayName'], cast[str(match['awayId'])]['displayName']
+            with self.subTest(mid=match['id']):
+                self.assertTrue(any(n in prompt for n in (home, away)), f'acts in prompt: {prompt}')
+                residue = prompt.replace(home, '').replace(away, '')   # digits only from fixture displayNames
+                self.assertFalse(any(c.isdigit() for c in residue), 'no invented numbers in prompt')
+                self.assertNotIn(match['title'], prompt)    # caption/title not embedded in the image prompt
+                self.assertIn('not a collage', prompt.lower())
+                self.assertIn('bottom', prompt.lower())     # caption space left on the rendered scene
+
+    def test_classification_variants_share_style_but_differ(self):
+        smoked = self.matchup(1, 1, 2, 100, 10, 'smoked', 90)
+        close = self.matchup(2, 3, 4, 15, 10, 'close', 5)
+        standard = self.matchup(3, 5, 6, 30, 22, 'standard', 8)
+        prompts = {m['id']: p for m, p in zip(
+            [smoked, close, standard],
+            packet.meme_prompts(self.edition([smoked, close, standard]), editorial()))}
+        self.assertNotEqual(prompts[1], prompts[2])
+        self.assertNotEqual(prompts[2], prompts[3])
+        for p in prompts.values():
+            self.assertIn('one full scene', p.lower())
+            self.assertIn('minimal', p.lower())
+
+    def test_same_classification_prompts_have_distinct_character_scenes(self):
+        catalog = json.loads((Path(__file__).resolve().parents[1] / 'src/data/editorial.json').read_text())
+        matches = [self.matchup(1, 5, 2, 76, 32.15, 'smoked', 43.85),
+                   self.matchup(2, 6, 7, 99.9, 60.75, 'smoked', 39.15)]
+        prompts = packet.meme_prompts(self.edition(matches), catalog)
+        normalized = []
+        for prompt in prompts:
+            for person in catalog['cast'].values():
+                prompt = prompt.replace(person['displayName'], 'CHARACTER')
+            normalized.append(prompt)
+        self.assertNotEqual(normalized[0], normalized[1], 'changing names is not a different scene')
+        self.assertIn('Neanderthal', prompts[0])
+        self.assertIn('blue Dodgers cap', prompts[1])
+        self.assertIn('chrome', prompts[1])
+        self.assertIn('reference', prompts[0].lower())
+        self.assertIn('reference', prompts[1].lower())
+
+    def test_unverified_edition_cannot_promote_stale_decided_classifications(self):
+        for status in ('incomplete', 'off-day'):
+            edition = self.edition(self.decided())
+            edition['status'] = status
+            prompts = packet.meme_prompts(edition, editorial())
+            self.assertEqual(len(prompts), 1)
+            self.assertIn('evergreen', prompts[0].lower())
+            self.assertIn('no game result implied', prompts[0])
+
+    def test_away_team_win_is_picked_and_named_without_error(self):
+        # Regression: the pickup ternary must bind both winner and loser. A nested
+        # tuple as loser_id previously caused KeyError on any away-team decided win.
+        away_wins = self.matchup(1, 1, 2, 10, 99, 'smoked', 89)
+        passed = self.matchup(2, 1, 2, 99, 10, 'smoked', 89)
+        prompts = packet.meme_prompts(self.edition([away_wins]), editorial())
+        self.assertEqual(len(prompts), 1)
+        cast = editorial()['cast']
+        self.assertIn(cast['2']['displayName'], prompts[0])  # away Alias 2 = winner
+        self.assertIn(cast['1']['displayName'], prompts[0])  # home Alias 1 = loser
+        # Sanity: symmetric home-wins still works identically.
+        home_prompts = packet.meme_prompts(self.edition([passed]), editorial())
+        self.assertIn(cast['1']['displayName'], home_prompts[0])
+        self.assertIn(cast['2']['displayName'], home_prompts[0])
+
+    def test_write_packet_includes_delimited_prompt_block_when_decided(self):
+        self.assertTrue(callable(getattr(packet, 'write_packet', None)))
+        try:
+            from PIL import Image
+        except ImportError:
+            self.skipTest('Pillow unavailable; image rendering explicitly skipped')
+        # Make team points decided so build_recaps produces classified (decided) matchups.
+        data = bundle()
+        for team, pts in zip(data['daily']['teams'], [100, 10, 60, 40, 30, 22, 15, 10]):
+            team['dailyPoints'] = pts
+        with tempfile.TemporaryDirectory() as directory:
+            repo = Path(directory); root = repo / 'snapshot'
+            (root / 'public/avatars').mkdir(parents=True)
+            catalog = editorial(); catalog['approvedMemes'] = []
+            profiles = dict(managers=[])
+            for i in range(1, 9):
+                image = f'avatars/person-{i}.webp'
+                Image.new('RGB', (80, 100), (i * 25, 10, 100)).save(root / 'public' / image)
+                profiles['managers'].append(dict(slug=f'person-{i}', approved=True, image=image))
+            report = pipeline.build_recaps([data], catalog, profiles, root=root, now=NOW)
+            avatars = pipeline.validate_catalog(catalog, profiles, root)
+            block = '/'.join('CHATGPT MEME PROMPTS'.lower().split())
+            message = packet.write_packet(repo, data, run_info(), root, report, catalog, avatars, NOW)
+            self.assertIn('CHATGPT MEME PROMPTS', message)
+            self.assertGreaterEqual(message.count('<---'), 2)   # clearly delimited block
+            self.assertIn('Alias 1', message)                    # exact cast displayNames in block
+
+    def test_write_packet_uses_evergreen_fallback_when_nothing_decided(self):
+        # bundle() is an all-tie verified edition; no decided matchups -> evergreen fallback prompt.
+        try:
+            from PIL import Image
+        except ImportError:
+            self.skipTest('Pillow unavailable; image rendering explicitly skipped')
+        with tempfile.TemporaryDirectory() as directory:
+            repo = Path(directory); root = repo / 'snapshot'
+            (root / 'public/avatars').mkdir(parents=True)
+            catalog = editorial(); catalog['approvedMemes'] = []
+            profiles = dict(managers=[])
+            for i in range(1, 9):
+                image = f'avatars/person-{i}.webp'
+                Image.new('RGB', (80, 100), (i * 25, 10, 100)).save(root / 'public' / image)
+                profiles['managers'].append(dict(slug=f'person-{i}', approved=True, image=image))
+            report = pipeline.build_recaps([bundle()], catalog, profiles, root=root, now=NOW)
+            avatars = pipeline.validate_catalog(catalog, profiles, root)
+            message = packet.write_packet(repo, bundle(), run_info(), root, report, catalog, avatars, NOW)
+            self.assertIn('CHATGPT MEME PROMPTS', message)
+            self.assertIn('evergreen', message.lower())
+
+
 class EndToEndTests(unittest.TestCase):
     def test_no_agent_packet_cli_with_git_and_github_only_at_transport_seam(self):
         self.assertTrue(callable(getattr(packet, 'main', None)), 'packet CLI missing')

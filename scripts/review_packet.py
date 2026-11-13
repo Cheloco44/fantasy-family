@@ -155,6 +155,127 @@ TIMING = ('Review by 06:00 Arizona; corrections/review/merge until 06:30. '
           'Publishing source snapshot 06:40; target 07:00 AZ (best effort).')
 FALLBACK = ('No response is not approval. Existing approved art/portraits remain the fallback; '
             'this script never approves, changes public source, or deploys.')
+PROMPT_HEADER = 'CHATGPT MEME PROMPTS (paste manually into ChatGPT — none generated here)'
+
+
+def _savagery(classification):
+    return {
+        'smoked': ('utterly smokes', 'a savage body-bag demolition: the winner towering in dramatic '
+                   'lighting with exaggerated swagger while the loser lies cartoonishly flattened in a '
+                   'non-graphic clubhouse body bag, absurd scale and slapstick carbonized ruin'),
+        'close': ('barely escapes', 'a nail-biting squeaker: winner and loser locked in a sweaty, '
+                  'last-second scramble, the winner panting with relief and the loser inches from an '
+                  'upset, muscle strain and heartbreak on every contorted face'),
+        'standard': ('cleanly outpoints', 'a routine but sharp receipt: the winner confidently in '
+                     'command, dropping a folded pink slip on the loser without breaking stride, '
+                     'workmanlike savagery and no unnecessary destruction'),
+    }.get(classification)
+
+
+CHARACTER_BRIEFS = {
+    'marcelo': 'a large strongman Commissioner with an absurd royal throne',
+    'rich': 'The Juice cartoon character with exaggerated supplement-powered muscles',
+    'zach': 'June Bug, the polite assassin with an infuriatingly courteous expression',
+    'ben': 'Ben Bunny, a permanently dissatisfied winner or loser at a complaint desk',
+    'jake': 'a towering Neanderthal Caveman with primitive clothes, rock tools and UGG/GRONK/BONK attitude',
+    'robert': 'IR BOB with glasses, long curly hair, beard and a royal-blue Dodgers cap',
+    'erik': 'Auto Erik as a recognizable chrome Skynet robot with a glowing red cybernetic eye',
+    'kyle': 'Jive Turkey, the Young Monkey blaming a malfunctioning AI computer',
+}
+
+# Separate staging for each character and result class, not names swapped into one gag.
+CHARACTER_SCENES = {
+    'jake': (
+        'The winner calmly drives a gigantic boulder steamroller; the loser emerges as a flat, unhurt cartoon cutout beside a cave mural.',
+        'The winner barely crosses a collapsing stone bridge clutching a tiny trophy, with the loser a fingertip behind.',
+        'The winner stamps the result with an enormous stone stamp while the loser waits at a ridiculous prehistoric service counter.'),
+    'robert': (
+        'The winner operates a giant scrapyard magnet; the loser rides a tiny metal escape pod helplessly into an oversized recycling bin.',
+        'The winner snatches his blue cap and the trophy from a closing arena door just ahead of the lunging loser.',
+        'The winner casually carries the arena remote control while the loser wrestles a hopelessly tangled power cable.'),
+    'marcelo': (
+        'The winner lounges on a ludicrously oversized throne; the loser receives a tiny jester stool and an enormous consolation cushion.',
+        'The winner barely balances on a tilting throne as the loser nearly pulls the royal cushion away.',
+        'The winner stages an extravagant coronation for a very small trophy; the loser folds his arms and refuses to applaud.'),
+    'rich': (
+        'The winner rides a gigantic cartoon supplement blender like a parade float; the loser sits sulking in its tiny passenger basket.',
+        'The winner squeezes an oversized muscle suit through the finish gate while the loser nearly overtakes the stuck costume.',
+        'The winner shares the podium with his cartoon blender while the loser inspects a comically long, completely blank supplement receipt.'),
+    'zach': (
+        'The winner politely gift-wraps a huge consolation box around the sulking loser, finishing it with an absurdly elegant bow.',
+        'The winner courteously bows while catching a trophy by its very last ribbon as the loser reaches for it.',
+        'The winner presents the loser with a blank etiquette certificate while discreetly holding the actual trophy behind his back.'),
+    'ben': (
+        'The winner drags an enormous trophy back to a complaint counter demanding a refund; the loser is buried in harmless crumpled forms.',
+        'The winner clings to a tiny trophy receipt after a frantic tug-of-war, already reaching for a service bell.',
+        'The winner holds a respectable trophy but angrily rings a complaint bell; the loser looks baffled that winning changed nothing.'),
+    'erik': (
+        'The winner runs a giant robotic inspection desk while the loser receives a tiny toy replacement vehicle from a conveyor belt.',
+        'The winner limps across the finish with loose metal parts and a smoking processor as the loser nearly unplugs its power lead.',
+        'The winner carries a modest trophy while the loser repeatedly presses a locked factory-reset button.'),
+    'kyle': (
+        'The winner lounges at an absurd AI blame-control console while the loser is buried in harmless paper-plane return fire.',
+        'The winner catches a wobbling banana-shaped trophy by its tip as the loser nearly reaches it first.',
+        'The winner carries the trophy while blaming a smoking computer; the loser holds its unplugged cable with an unimpressed expression.'),
+}
+
+
+def _character_scene(winner, loser, classification, default):
+    index = {'smoked': 0, 'close': 1, 'standard': 2}[classification]
+    scenes = CHARACTER_SCENES.get(winner['slug'])
+    scene = scenes[index] if scenes else default
+    refs = ('Use the supplied approved character reference images and preserve their likenesses. '
+            f"Winner design: {CHARACTER_BRIEFS.get(winner['slug'], 'follow the supplied winner reference')}. "
+            f"Loser design: {CHARACTER_BRIEFS.get(loser['slug'], 'follow the supplied loser reference')}. ")
+    return refs + scene
+
+
+def meme_prompts(edition, catalog):
+    """Deterministic ready-to-paste ChatGPT meme prompts from verified decided daily matchups.
+
+    Returns 1-3 prompts (one full cinematic scene each) drawn only from decided
+    (close/standard/smoked) matchups, largest real verified margins first. On no decided
+    matchup (tie/off-day/incomplete/unavailable) returns a single evergreen-rivalry prompt.
+    Uses only verified fields plus catalog cast displayNames; never invents scores or margins.
+    """
+    cast = catalog['cast']
+    if edition.get('status') != 'verified-aggregate':
+        return [_evergreen_prompt(cast)]
+    decided = [m for m in edition['matchups'] if m['classification'] in ('close', 'standard', 'smoked')]
+    if not decided:
+        return [_evergreen_prompt(cast)]
+    decided.sort(key=lambda m: (-m['margin'], m['id']))   # largest real margin first, stable by id
+    prompts = []
+    for match in decided[:3]:
+        win_id, lose_id = ((match['homeId'], match['awayId'])
+                           if match['homePoints'] > match['awayPoints']
+                           else (match['awayId'], match['homeId']))
+        winner = cast[str(win_id)]['displayName']
+        loser = cast[str(lose_id)]['displayName']
+        verb, scene = _savagery(match['classification'])
+        scene = _character_scene(cast[str(win_id)], cast[str(lose_id)], match['classification'], scene)
+        prompts.append((f"Redlands Possum Busters daily meme — {winner} {verb} {loser}. "
+                        f"{scene}. One full scene in the approved cinematic cartoon-realistic style, "
+                        f"not a collage or portrait grid. Fictional league characters only — no real people, no gore, "
+                        f"no invented stats, no attribution. Minimal integrated on-scene text; keep the "
+                        f"caption off the rendered scene and leave a clear empty lower band at the "
+                        f"bottom of the image where the caption can be added later. Dramatic lighting, "
+                        f"absurd scale, slapstick clubhouse humiliation."))
+    return prompts
+
+
+def _evergreen_prompt(cast):
+    """Single evergreen-rivalry fallback prompt when the edition has no decided matchup."""
+    team_six = cast['6']['displayName']
+    team_seven = cast['7']['displayName']
+    return (f"Redlands Possum Busters evergreen meme — {team_six} vs {team_seven}. One full scene "
+            f"in the approved cinematic cartoon-realistic style of this recurring clubhouse rivalry, "
+            f"not a collage or portrait grid. Absurd scale, dramatic lighting, slapstick mechanical "
+            f"humiliation and savage banter. "
+            f"Fictional league characters only — no real people, no gore, no invented stats, no "
+            f"attribution, no game result implied. Minimal integrated on-scene text; keep the caption "
+            f"off the rendered scene and leave a clear empty lower band at the bottom of the image for "
+            f"the caption.")
 
 
 def output_dir(repo, day):
@@ -251,6 +372,11 @@ def write_packet(repo, value, run, root, report, catalog, avatars, now):
             temporary.unlink(missing_ok=True)
     if value['daily']['status'] == 'off-day':
         message.append('Off-day: text review only; no scores or draft images invented.')
+    prompts = meme_prompts(edition, catalog)
+    if prompts:
+        message.extend(['<--- ' + PROMPT_HEADER + ' --->'])
+        message.extend(f'{i}. {p}' for i, p in enumerate(prompts, 1))
+        message.append('<--- --->')
     message.extend([TIMING, 'Reply here and mention Neo with candidate IDs to approve or with edits. Owner approval plus reviewed catalog merge is required.', FALLBACK])
     return '\n'.join(message)
 
