@@ -8,6 +8,23 @@
 - **Humor:** daily rounds drive daily jokes. Close rounds are acknowledged; a 20-point-or-greater daily margin can get a smoked-result roast. These thresholds are editable in `src/data/editorial.json`, not mysterious model judgments. Fictional characters remain separate from real scores.
 - **History:** approved, dated source bundles accumulate under `src/data/daily/`. Verified daily-round results support rolling seven-calendar-day records and recurring jokes. Three recorded daily-round losses can earn a bye-week joke, with the actual count/window/available coverage disclosed. These are NOT ESPN weekly matchup losses. Missing dates do not prove streaks. Thin history stays thin rather than being invented.
 
+## Owner review: time to correct, not a last-minute approval race
+
+All times are `America/Phoenix` (UTC−7 year-round):
+
+- **04:30:** a separate read-only GitHub workflow prepares sanitized prior-day aggregates. It cannot publish source or deploy the website.
+- **05:00:** Neo's own Hermes profile delivers an unpublished draft recap/image packet to the originating Discord conversation (this shared room, not a private DM). These are newly captioned composites of approved portraits, not new AI-generated poses. Draft files stay outside public source.
+- **05:45:** a reminder asks for any remaining feedback.
+- **06:00:** owner feedback/approval deadline. Reply here and mention Neo so the assistant actually receives the approval or edit request; it cannot search Discord history or infer an unseen reply.
+- **06:00–06:30:** correction, reapproval if necessary, technical reviews, tests and ordinary reviewed source push. Work can begin as soon as feedback arrives; it need not wait until 06:00.
+- **06:30:** correction/merge cutoff and final status notice. Only explicitly approved artwork actually present in the remote approved catalog counts as ready. A local draft, chat approval alone or pending commit is not proof it reached the publishing source.
+- **06:40:** existing daily publication preparation/checkout target. Its exact checked-out revision is the binding snapshot; queue delays do not extend the editorial deadline.
+- **07:00:** existing not-before scheduled deployment target. GitHub scheduling/Pages and Discord delivery remain best effort, not exact-time guarantees.
+
+No response, a failed review preparation/delivery, a missed cutoff, or an uncompleted correction means **use already approved suitable art/portraits**, not a draft and not a delayed edition waiting indefinitely for approval. A late setup/test packet is labeled late and is not evidence that its 05:00 review delivery occurred. The first regular early-review cycle begins after setup, not retroactively this morning.
+
+The three Hermes jobs are script-only (`no_agent`), so preparing and sending the review packet/reminders do not depend on an inference-model quota. The gateway/VPS, GitHub access and configured Discord adapter must still be running. The website's independent GitHub workflow retains its safe fallback if the local review service is unavailable. See [REVIEW-OPERATIONS.md](REVIEW-OPERATIONS.md) for setup, exact scripts, canary verification and recovery.
+
 ## Images: approval first; absence is not approval
 
 Newly created or newly supplied family memes remain in ignored `private/meme-drafts/` or `artifacts/` while the owner reviews them. Do not commit unreviewed images to the public repository, even outside `public/`. A chat attachment provided for style learning is not blanket publication consent.
@@ -15,7 +32,7 @@ Newly created or newly supplied family memes remain in ignored `private/meme-dra
 After explicit owner approval:
 1. Strip image metadata and export only the intended derivative to `public/memes/approved/`.
 2. Add a unique entry to `src/data/editorial.json.approvedMemes`, with relative image path, caption, original context date, character-manager slugs, tags, `approvalStatus: "approved"`, and `contextType` (`dated` or `evergreen`). If the image contains baked-in daily scores, record `scoreContext` as exact ESPN-team-ID-string → daily-points pairs. A later correction that disagrees with those values forces approved fallback art. Review/commit/publish that exact change.
-3. The daily run uses the approved catalog from its checked-out revision. An approval not included before the 06:40 preparation snapshot cannot be assumed to have reached that edition.
+3. Finish correction, explicit owner reapproval of changed images, technical reviews/tests and the reviewed ordinary source push by **06:30**. The daily run uses the approved catalog from its actual checked-out revision. Chat approval not committed/pushed into that source is not publication readiness; late approval is not assumed to be included in that edition.
 
 If there is no approved new image, the daily edition uses approved existing artwork or an approved character portrait. It does NOT wait for a reply and does NOT publish a draft. A dated scoreboard meme is used for its own date only; the locker can retain it as a clearly dated archive item. Old baked-in numbers are never passed off as today's score.
 
@@ -51,4 +68,4 @@ The collection CLI requires explicit `--network`; cookies come only from the exi
 
 Validation/collection/import failures preserve last-good data and do not deploy partial results. The existing site's dates and client freshness warnings reveal an older edition/snapshot; a failed run does not falsely stamp old data as fresh. An unavailable daily value is not zero. Off-days and provisional/incomplete results are labeled and do not create fake daily wins/losses. Later provider corrections update the same date key and rebuild affected trend calculations rather than duplicating editions.
 
-The schedule changes the website. No Discord-specific API or automatic family-channel blast is configured by this workflow; the published link remains shareable. Check the exact Actions run/revision and public page before claiming a refresh succeeded.
+The website workflow changes the website, not Discord. A separate Hermes `neo` script-only review service sends the 05:00 packet and two status messages to the originating Discord conversation; it does not broadcast to family channels or search chat history. The published link remains shareable. Verify the exact Actions run/revision and public page before claiming a website refresh succeeded; verify cron delivery status separately before claiming review messages were sent.

@@ -1,0 +1,61 @@
+name: Prepare daily review input
+
+on:
+  schedule:
+    - cron: '30 11 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+# 04:30 America/Phoenix; Actions schedules and runner availability are best effort.
+# Preparation only: never import source, write to the repository, or deploy Pages.
+jobs:
+  prepare:
+    if: github.repository == 'Cheloco44/fantasy-family' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Check out reviewed source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Offline Python tests before credentials
+        run: |
+          set -euo pipefail
+          PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -s scripts -p 'test_*.py' -v
+      - name: Collect sanitized review input
+        env:
+          ESPN_S2: ${{ secrets.ESPN_S2 }}
+          ESPN_SWID: ${{ secrets.ESPN_SWID }}
+        run: |
+          set -euo pipefail
+          set +x
+          ulimit -c 0
+          if ! python scripts/daily_pipeline.py collect --network --output-dir artifacts/review-input >/dev/null 2>&1; then
+            echo 'Review input collection failed; no artifact prepared.' >&2
+            exit 1
+          fi
+      - name: Validate exact artifact files without credentials
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          batch = Path('artifacts/review-input')
+          expected = {'daily.json', 'current.json'}
+          if (batch.is_symlink() or not batch.is_dir()
+                  or set(p.name for p in batch.iterdir()) != expected
+                  or any(p.is_symlink() or not p.is_file() for p in batch.iterdir())):
+              raise SystemExit('Invalid review input files; no artifact prepared.')
+          PY
+      - name: Upload exact sanitized review input
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: daily-review-input
+          path: |
+            artifacts/review-input/daily.json
+            artifacts/review-input/current.json
+          retention-days: 1
+          if-no-files-found: error
