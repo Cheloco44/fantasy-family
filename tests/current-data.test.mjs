@@ -25,13 +25,24 @@ test('score labels preserve category records, zero points and missing data disti
  assert.equal(scoreText({available:true,points:10},'UNKNOWN'),'Unavailable');
 });
 
-test('built scoreboard is first and distinguishes verified snapshots from empty state',()=>{
+test('snapshot status supports the seven-AM pipeline without stale manual-only claims',()=>{
+ const clubhouse=JSON.parse(readFileSync('src/data/clubhouse.json','utf8'));
+ assert.equal(clubhouse.refreshTime,'07:00');
+ const status=readFileSync('src/components/DataStatus.astro','utf8');
+ assert.ok(status.includes('07:00'));
+ assert.ok(status.includes('daily-clubhouse.yml'));
+ assert.ok(!status.includes('No automatic score refresh is enabled'));
+ assert.ok(!status.includes('DEMO DATA · Not actual daily results'));
+ const board=readFileSync('src/components/CurrentLeague.astro','utf8');
+ assert.ok(!board.includes('Manual ESPN snapshot'));
+});
+
+test('built scoreboard distinguishes verified snapshots from empty state',()=>{
  const snapshot=JSON.parse(readFileSync('src/data/current.json','utf8'));
  const html=readFileSync('dist/index.html','utf8');
  assert.ok(html.indexOf('The scoreboard.')>=0);
- assert.ok(html.indexOf('The scoreboard.')<html.indexOf('THE MORNING SKATE'));
+ assert.ok(!html.includes('recaps remain DEMO DATA'));
  assert.ok(html.includes('data-snapshot-time'));
- assert.ok(html.includes('DEMO DATA'));
  if(snapshot.mode==='live'){
   assert.equal(snapshot.teams.length,8);
   assert.equal(new Set(snapshot.teams.map(t=>t.id)).size,8);

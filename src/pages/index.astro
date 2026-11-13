@@ -1,9 +1,34 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import data from '../data/clubhouse.json';
+import recaps from '../data/recaps.json';
+import editorial from '../data/editorial.json';
 import CurrentLeague from '../components/CurrentLeague.astro';
 import DataStatus from '../components/DataStatus.astro';
+import { existsSync } from 'node:fs';
 const base = import.meta.env.BASE_URL;
-const featured = data.memes.find(m=>m.featured);
+const latest = recaps.editions[0];
+const stamp = value => new Intl.DateTimeFormat('en-US', { timeZone: 'America/Phoenix', dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
+const featured = editorial.approvedMemes.find(m => m.approvalStatus === 'approved' && /^(memes|avatars)\/[a-zA-Z0-9_./-]+\.(webp|png|jpg|svg)$/.test(m.image) && !m.image.includes('..') && existsSync(`public/${m.image}`));
 ---
-<Layout title="Clubhouse" active="home"><div class="dashboard"><div><CurrentLeague /><section class="lead" style="margin-top:32px" aria-labelledby="headline"><span class="pill">THE MORNING SKATE / SAMPLE EDITION</span><div class="eyebrow">Daily recap / style preview</div><h2 id="headline">The bench would<br/>like a word.</h2><p>A sample of the morning broadcast: questionable lineup decisions, original chirps, and a healthy respect for the receipts. No actual league results are represented.</p><a class="btn" href={`${base}recaps/sample/`}>Read the sample edition <span aria-hidden="true">↗</span></a></section><section><div class="section-heading"><h2>Meet the management</h2><a href={`${base}managers/`}>All profiles →</a></div>{data.managers.map(m=><a class="mini-profile" href={`${base}managers/${m.slug}/`}><img class="avatar mini-portrait" src={`${base}${m.image}`} alt={`${m.alias} — owner-labeled portrait`} width="54" height="54" loading="lazy" /><span><strong>{m.alias}</strong><small>{m.team} · owner-supplied</small></span><span style="margin-left:auto" aria-hidden="true">↗</span></a>)}</section></div><aside class="sidebar"><DataStatus />{featured&&<section class="featured"><div class="eyebrow">FROM THE MEME LOCKER / DEMO</div><a href={`${base}memes/`}><img src={`${base}${featured.image}`} width="780" height="600" alt={featured.caption}/></a><p>{featured.caption}</p><a class="small" href={`${base}memes/`}>Browse the locker →</a></section>}</aside></div></Layout>
+<Layout title="Clubhouse" active="home">
+  <div class="dashboard"><div>
+    {latest ? <section class="lead daily-lead" aria-labelledby="headline" data-recap-date={latest.date}>
+      <span class="pill">THE MORNING SKATE / DAILY ROUND</span>
+      <p class="eyebrow"><time datetime={latest.date}>{latest.date}</time> · ARIZONA EDITION · {latest.status === 'verified-aggregate' ? 'VERIFIED TEAM AGGREGATES' : latest.status === 'off-day' ? 'OFF-DAY' : 'INCOMPLETE'}</p>
+      <h1 id="headline">{latest.headline}</h1><p>{latest.dek}</p>
+      <p class="freshness-warning" data-recap-stale hidden role="status">This edition is older than yesterday in Arizona. A refresh may be delayed or have failed; the last successful recap stays available.</p>
+      <p class="small">Source fetched <time datetime={latest.sourceFetchedAt}>{stamp(latest.sourceFetchedAt)} AZ</time>. Daily team totals—not a final weekly result or verified player/lineup report.</p>
+      <a class="btn" href={`${base}recaps/${latest.date}/`}>Read the daily round <span aria-hidden="true">↗</span></a>
+      <a class="archive-link" href={`${base}recaps/`}>All editions →</a>
+      <noscript><p class="small">Freshness check needs JavaScript. Compare this edition date with yesterday in Arizona.</p></noscript>
+    </section> : <section class="lead"><h1>The morning skate is warming up.</h1><p>No daily edition is available yet. No results are invented to fill the ice.</p><a href={`${base}recaps/`}>Recap archive →</a></section>}
+    {latest && <section class="daily-rivalries" aria-labelledby="rivalries"><div class="section-heading"><h2 id="rivalries">Last round. Next grudge.</h2></div>{latest.matchups.map(m => <a class="round-preview" href={`${base}recaps/${latest.date}/#round-${m.id}`}><span class="eyebrow">DAILY ROUND · {m.classification}</span><h3>{m.title}</h3><p>{m.homeAlias} <strong>{m.homePoints ?? 'Unavailable'}</strong> <span aria-hidden="true"> / </span><span class="sr-only">versus</span> {m.awayAlias} <strong>{m.awayPoints ?? 'Unavailable'}</strong></p><span class="small">{m.trendNotes[0] || 'The archive is just getting started.'}</span></a>)}</section>}
+    <CurrentLeague />
+    <section><div class="section-heading"><h2>Meet the management</h2><a href={`${base}managers/`}>All profiles →</a></div>{data.managers.map(m => <a class="mini-profile" href={`${base}managers/${m.slug}/`}><img class="avatar mini-portrait" src={`${base}${m.image}`} alt={`${m.alias} — owner-labeled portrait`} width="54" height="54" loading="lazy"/><span><strong>{Object.values(editorial.cast).find(c => c.slug === m.slug)?.displayName || m.alias}</strong><small>Owner-supplied profile · fictional league lore</small></span><span style="margin-left:auto" aria-hidden="true">↗</span></a>)}</section>
+  </div><aside class="sidebar">
+    {featured && <section class="featured"><div class="eyebrow">FROM THE MEME LOCKER / APPROVED</div><a href={`${base}memes/`}><img src={`${base}${featured.image}`} width="780" height="600" alt={featured.caption}/></a><h2>{featured.caption}</h2><p class="small muted">Artwork from {featured.date} · fictional rivalry banter</p><a class="small" href={`${base}memes/`}>Browse the locker →</a></section>}
+    <section class="publication-note"><h2>The morning routine</h2><p>Target: <strong>07:00 America/Phoenix</strong>, covering the prior Arizona calendar day. Scheduled publication is best-effort; delays happen, not an exact-time guarantee.</p><p class="small">New images need owner approval. No response? Use approved evergreen art or a portrait—not an unreviewed draft. No AI scene-generation service is configured.</p></section>
+    <DataStatus />
+  </aside></div>
+</Layout>

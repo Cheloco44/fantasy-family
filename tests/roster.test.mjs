@@ -3,14 +3,14 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 const data=JSON.parse(readFileSync('src/data/clubhouse.json','utf8'));
 const expected=[
- ['marcelo','Marcelo','Americas fupa','big guy strongman'],
- ['rich','rich','district 9','old monkey or old man'],
- ['zach','zach','junes half baked qaks','half human half bug'],
- ['ben','ben','good squad','blue hair guy with skinny legs'],
- ['jake','jake','can nikgar','caveman; has many different faces'],
- ['robert','robert','anti chel warriors','older guy in a dodgers hat'],
- ['erik','ERIK','pash patels','robot'],
- ['kyle','kyle','Team Jive turkey','young monkey or young guy in a jester hat'],
+ ['marcelo','Marcelo','America’s FUPA','big guy strongman'],
+ ['rich','Rich','District 9','old monkey or old man'],
+ ['zach','Zach','June’s Half-Baked Quacks','half human half bug'],
+ ['ben','Ben','The Goon Squad','blue hair guy with skinny legs'],
+ ['jake','Jake','Cave Kings','caveman; has many different faces'],
+ ['robert','Robert','Anti-Chel Warriors','older guy in a dodgers hat'],
+ ['erik','Erik','Patel Pals','robot'],
+ ['kyle','Kyle','Jive Turkey','young monkey or young guy in a jester hat'],
 ];
 test('eight owner-supplied mappings are preserved without fabricated profile details',()=>{
  assert.equal(data.managers.length,expected.length);

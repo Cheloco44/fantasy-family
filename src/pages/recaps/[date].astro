@@ -1,0 +1,41 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import recaps from '../../data/recaps.json';
+import editorial from '../../data/editorial.json';
+import { existsSync } from 'node:fs';
+export function getStaticPaths() {
+  return recaps.editions.map((edition, index) => ({ params: { date: edition.date }, props: { edition, index } }));
+}
+const { edition, index } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const stamp = value => new Intl.DateTimeFormat('en-US', { timeZone: 'America/Phoenix', dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
+const asset = image => typeof image === 'string' && /^(memes|avatars)\/[a-zA-Z0-9_./-]+\.(webp|png|jpg|svg)$/.test(image) && !image.includes('..') && existsSync(`public/${image}`);
+const artwork = meme => meme?.approvalStatus === 'approved' && asset(meme.image) && (meme.sourceDate === null || meme.sourceDate === edition.date) ? meme : null;
+const sourceRun = typeof edition.sourceRunUrl === 'string' && /^https:\/\/github\.com\/Cheloco44\/fantasy-family\/actions\/runs\/\d+$/.test(edition.sourceRunUrl) ? edition.sourceRunUrl : null;
+---
+<Layout title={`${edition.date} daily round`} active="recaps">
+  <article class="daily-edition" data-recap-date={index === 0 ? edition.date : undefined}>
+    <a class="small" href={`${base}recaps/`}>← All daily editions</a>
+    <header class="edition-heading"><span class="pill">THE MORNING SKATE / DAILY ROUND</span><p class="eyebrow"><time datetime={edition.date}>{edition.date}</time> · AMERICA/PHOENIX · {edition.status === 'verified-aggregate' ? 'VERIFIED TEAM AGGREGATES' : edition.status === 'off-day' ? 'OFF-DAY' : 'INCOMPLETE'}</p><h1>{edition.headline}</h1><p class="edition-dek">{edition.dek}</p></header>
+    {index === 0 && <p class="freshness-warning" data-recap-stale hidden role="status">The latest edition is older than yesterday in Arizona. A refresh may be delayed or have failed; this is the last successful edition, not fresh results.</p>}
+    <section class="edition-evidence" aria-labelledby="evidence-title"><h2 id="evidence-title">The receipts</h2><p>{edition.coverageNote}</p><p class="small">Daily source fetched <time datetime={edition.sourceFetchedAt}>{stamp(edition.sourceFetchedAt)} AZ</time>. Scoring period {edition.scoringPeriodId ?? 'unavailable'} · matchup period {edition.matchupPeriodId ?? 'unavailable'}.{sourceRun && <> <a href={sourceRun}>Source collection run ↗</a></>}</p><p class="small">Daily team totals only. No player, goalie or active/bench attribution is verified here. A DAILY ROUND is not a completed weekly matchup win.</p></section>
+    <nav class="round-nav" aria-label="Daily rounds">{edition.matchups.map(m => <a href={`#round-${m.id}`}>{m.homeAlias} × {m.awayAlias}</a>)}</nav>
+    {edition.matchups.map(m => {
+      const meme = artwork(m.meme);
+      const portrait = editorial.cast[String(m.homeId)]?.slug;
+      const fallback = portrait && asset(`avatars/${portrait}.webp`) ? `avatars/${portrait}.webp` : null;
+      return <section class="daily-round" id={`round-${m.id}`} aria-labelledby={`round-title-${m.id}`}>
+        <div class="round-copy"><span class="eyebrow">DAILY ROUND · {m.classification}</span><h2 id={`round-title-${m.id}`}>{m.title}</h2>
+          <div class="daily-score" aria-label="Daily fantasy points"><p><span>{m.homeAlias}</span><strong>{m.homePoints ?? 'Unavailable'}</strong></p><p><span>{m.awayAlias}</span><strong>{m.awayPoints ?? 'Unavailable'}</strong></p></div>
+          {m.margin !== null && <p class="small muted">Daily margin: {m.margin} points</p>}
+          <p>{m.story}</p>
+          {m.trendNotes.length > 0 && <div class="trend-notes"><h3>Rivalry notebook</h3><ul>{m.trendNotes.map(note => <li>{note}</li>)}</ul></div>}
+        </div>
+        {(meme || fallback) && <figure class="round-art"><img src={`${base}${meme ? meme.image : fallback}`} alt={meme ? meme.caption : `${m.homeAlias} — approved portrait fallback`} width="780" height="600" loading="lazy"/><figcaption><strong>{meme ? meme.caption : 'The rivalry continues. Approved portrait on duty.'}</strong><p class="small muted">{meme ? meme.isArchive ? `Approved archive artwork · ${meme.sourceDate ?? 'evergreen'}` : `Approved artwork · ${meme.sourceDate ?? 'evergreen fallback'}` : 'No new approved artwork; existing portrait fallback.'} · Fictional league banter, not an attributed quote.</p></figcaption></figure>}
+        {m.weeklySummary && edition.weeklyContextAt && <aside class="weekly-context"><h3>Separate weekly context</h3><p>{m.weeklySummary}</p><p class="small">Current snapshot fetched <time datetime={edition.weeklyContextAt}>{stamp(edition.weeklyContextAt)} AZ</time>. Not end-of-day standings and not a final weekly result.</p></aside>}
+      </section>;
+    })}
+    <section class="publication-note"><h2>Tomorrow's chirps need receipts, too.</h2><p>Target publication: 07:00 America/Phoenix for the prior Arizona date. Best-effort scheduling can run late. New images require owner approval; no response means approved evergreen art or a portrait fallback. No AI scene-generation service is configured.</p><p class="small">Daily-margin rules: ≤{editorial.closeMargin} points is close; ≥{editorial.smokedMargin} is smoked. Trends count verified daily rounds in the stated seven-calendar-day window, not official ESPN weekly W–L. Missing days never prove an unbroken streak.</p></section>
+    <nav class="edition-navigation" aria-label="Other daily editions">{recaps.editions[index + 1] && <a href={`${base}recaps/${recaps.editions[index + 1].date}/`}>← Older: {recaps.editions[index + 1].date}</a>}<a href={`${base}recaps/`}>Archive</a>{index > 0 && <a href={`${base}recaps/${recaps.editions[index - 1].date}/`}>Newer: {recaps.editions[index - 1].date} →</a>}</nav>
+  </article>
+</Layout>

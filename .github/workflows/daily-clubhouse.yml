@@ -1,0 +1,184 @@
+name: Daily clubhouse
+
+on:
+  schedule:
+    - cron: '40 13 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+# Owner-approved automatic prior-day AZ updates; approved existing image fallback only.
+# Actions schedules and runner availability are best effort: delays can publish late.
+# No exact 07:00 guarantee. Manual dispatch bypasses the scheduled not-before gate.
+jobs:
+  collect:
+    if: github.repository == 'Cheloco44/fantasy-family' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Check out reviewed source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Offline Python tests before credentials
+        run: |
+          set -euo pipefail
+          PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -s scripts -p 'test_*.py' -v
+      - name: Collect sanitized daily batch
+        env:
+          ESPN_S2: ${{ secrets.ESPN_S2 }}
+          ESPN_SWID: ${{ secrets.ESPN_SWID }}
+        run: |
+          set -euo pipefail
+          set +x
+          ulimit -c 0
+          if ! python scripts/daily_pipeline.py collect --network --output-dir artifacts/daily-batch >/dev/null 2>&1; then
+            echo 'Collection failed; preserving last good data.' >&2
+            exit 1
+          fi
+      - name: Upload exact sanitized batch
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: daily-clubhouse-batch
+          path: |
+            artifacts/daily-batch/daily.json
+            artifacts/daily-batch/current.json
+          retention-days: 1
+          if-no-files-found: error
+
+  publish:
+    needs: collect
+    if: github.repository == 'Cheloco44/fantasy-family' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    outputs:
+      published_sha: ${{ steps.push.outputs.sha }}
+    steps:
+      - name: Check out exact collected source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Download exact sanitized batch
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: daily-clubhouse-batch
+          path: artifacts/daily-batch
+      - name: Revalidate and import offline
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          batch = Path('artifacts/daily-batch')
+          expected = {'daily.json', 'current.json'}
+          if set(p.name for p in batch.iterdir()) != expected or any(p.is_symlink() or not p.is_file() for p in batch.iterdir()):
+              raise SystemExit('Unexpected artifact entries; refusing import')
+          PY
+          if ! python scripts/daily_pipeline.py import --input-dir artifacts/daily-batch >/dev/null 2>&1; then
+            echo 'Import failed; preserving last good data.' >&2
+            exit 1
+          fi
+      - name: Stage only validated public source
+        run: |
+          set -euo pipefail
+          git add -- ':(glob)src/data/daily/*.json' src/data/current.json src/data/recaps.json
+          python - <<'PY'
+          import re
+          import subprocess
+          paths = subprocess.check_output('git diff --cached --name-only -z'.split()).decode().split('\0')
+          for path in filter(None, paths):
+              if path not in {'src/data/current.json', 'src/data/recaps.json'} and not re.fullmatch(r"src/data/daily/\d{4}-\d{2}-\d{2}\.json", path):
+                  raise SystemExit('Unexpected staged path; refusing publication')
+          PY
+      - name: Push validated source
+        id: push
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          set +x
+          base=$(git rev-parse HEAD)
+          # Ephemeral auth header, never a credential-bearing remote URL or saved config.
+          auth=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)
+          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth" fetch --no-tags origin refs/heads/main:refs/remotes/origin/main
+          # Any owner change since collection fails closed. Never pull/rebase/force.
+          test "$base" = "$(git rev-parse refs/remotes/origin/main)"
+          if ! git diff --cached --quiet; then
+            git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Update verified daily clubhouse source'
+            git merge-base --is-ancestor "$base" HEAD
+            # An intervening remote change rejects this ordinary fast-forward push.
+            git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth" push origin HEAD:refs/heads/main
+          fi
+          # Read back main even for a no-op import; fail if the owner advanced it.
+          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth" fetch --no-tags origin refs/heads/main:refs/remotes/origin/main
+          test "$(git rev-parse HEAD)" = "$(git rev-parse refs/remotes/origin/main)"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: publish
+    if: github.repository == 'Cheloco44/fantasy-family' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Check out exact published source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ needs.publish.outputs.published_sha }}
+          persist-credentials: false
+      - name: Set up Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '26'
+      - name: Build and test public site
+        env:
+          BASE_PATH: /fantasy-family/
+          ASTRO_TELEMETRY_DISABLED: '1'
+        run: |
+          set -euo pipefail
+          npm ci --ignore-scripts
+          npm run build
+          npm test
+      - name: Upload only built site
+        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    if: github.repository == 'Cheloco44/fantasy-family' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Scheduled not-before gate
+        if: github.event_name == 'schedule'
+        run: |
+          set -euo pipefail
+          now=$(date -u +%s)
+          target=$(date -u -d "$(date -u +%F) 14:00:00" +%s)
+          delay=$((target - now))
+          # Bound waits to the 06:40–07:00 AZ preparation window; fail closed otherwise.
+          if (( delay > 0 )); then
+            (( delay <= 1200 )) || { echo 'Outside bounded publication window' >&2; exit 1; }
+            sleep "$delay"
+          fi
+      - name: Deploy verified public site
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4

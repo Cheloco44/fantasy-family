@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "timezone": "America/Phoenix",
+  "publishTarget": "07:00",
+  "closeMargin": 5,
+  "smokedMargin": 20,
+  "cast": {
+    "1": {
+      "slug": "marcelo",
+      "displayName": "The Commissioner",
+      "teamName": "America’s FUPA"
+    },
+    "2": {
+      "slug": "rich",
+      "displayName": "The Juice",
+      "teamName": "District 9"
+    },
+    "3": {
+      "slug": "zach",
+      "displayName": "June Bug",
+      "teamName": "June’s Half-Baked Quacks"
+    },
+    "4": {
+      "slug": "ben",
+      "displayName": "Ben Bunny",
+      "teamName": "The Goon Squad"
+    },
+    "5": {
+      "slug": "jake",
+      "displayName": "The Caveman",
+      "teamName": "Cave Kings"
+    },
+    "6": {
+      "slug": "robert",
+      "displayName": "Blue Hat",
+      "teamName": "Anti-Chel Warriors"
+    },
+    "7": {
+      "slug": "erik",
+      "displayName": "Auto Erik",
+      "teamName": "Patel Pals"
+    },
+    "8": {
+      "slug": "kyle",
+      "displayName": "Jive Turkey",
+      "teamName": "Jive Turkey"
+    }
+  },
+  "approvedMemes": [
+    {
+      "id": "nov11-01-kyle-coup",
+      "image": "memes/approved/01-kyle-coup.jpg",
+      "caption": "The coup has a daily limit. Won the day; still blaming AI.",
+      "date": "2026-11-11",
+      "managers": [
+        "kyle",
+        "marcelo"
+      ],
+      "tags": [
+        "2026-27",
+        "nov11",
+        "daily-round",
+        "fictional-banter"
+      ],
+      "approvalStatus": "approved",
+      "contextType": "dated",
+      "scoreContext": {
+        "8": 40.55,
+        "1": 26.75
+      }
+    },
+    {
+      "id": "nov11-02-ben-bug",
+      "image": "memes/approved/02-ben-bug.jpg",
+      "caption": "The Bunny found the bug zapper.",
+      "date": "2026-11-11",
+      "managers": [
+        "ben",
+        "zach"
+      ],
+      "tags": [
+        "2026-27",
+        "nov11",
+        "daily-round",
+        "fictional-banter"
+      ],
+      "approvalStatus": "approved",
+      "contextType": "dated",
+      "scoreContext": {
+        "4": 37.75,
+        "3": 14.75
+      }
+    },
+    {
+      "id": "nov11-03-anti-skynet",
+      "image": "memes/approved/03-anti-skynet.jpg",
+      "caption": "Skynet met the team-mom group chat.",
+      "date": "2026-11-11",
+      "managers": [
+        "robert",
+        "erik"
+      ],
+      "tags": [
+        "2026-27",
+        "nov11",
+        "daily-round",
+        "fictional-banter"
+      ],
+      "approvalStatus": "approved",
+      "contextType": "dated",
+      "scoreContext": {
+        "6": 48.75,
+        "7": 31.5
+      }
+    },
+    {
+      "id": "nov11-04-juice-caveman",
+      "image": "memes/approved/04-juice-caveman.jpg",
+      "caption": "All that juice. Still got clubbed.",
+      "date": "2026-11-11",
+      "managers": [
+        "jake",
+        "rich"
+      ],
+      "tags": [
+        "2026-27",
+        "nov11",
+        "daily-round",
+        "fictional-banter"
+      ],
+      "approvalStatus": "approved",
+      "contextType": "dated",
+      "scoreContext": {
+        "5": 61.25,
+        "2": 40.0
+      }
+    }
+  ]
+}

@@ -1,9 +1,11 @@
 ---
 import snapshot from '../data/current.json';
 import { scoreText } from '../lib/current-data.mjs';
+import editorial from '../data/editorial.json';
+import { teamLabel } from '../lib/team-names.mjs';
 const connected = snapshot.mode === 'live';
 const teams = [...snapshot.teams].sort((a,b) => (a.standing ?? Infinity) - (b.standing ?? Infinity));
-const names = new Map(snapshot.teams.map(t => [t.id, t.name]));
+const names = new Map(snapshot.teams.map(t => [t.id, teamLabel(t.id,editorial.cast)]));
 const category = snapshot.scoringType === 'H2H_CATEGORY';
 const asOf = connected && snapshot.fetchedAt ? new Date(snapshot.fetchedAt).toLocaleString('en-US',{timeZone:'America/Phoenix',dateStyle:'medium',timeStyle:'short'}) : null;
 const name = side => side ? (names.get(side.teamId) || 'Team unavailable') : 'BYE';
@@ -11,7 +13,7 @@ const name = side => side ? (names.get(side.teamId) || 'Team unavailable') : 'BY
 <div class="eyebrow">CURRENT LEAGUE DESK</div>
 <h1>The scoreboard.</h1>
 {asOf && <p class="small muted">Snapshot collected {asOf} · Arizona time</p>}
-<p class="small" data-compact-freshness aria-live="polite">{connected ? 'Manual ESPN snapshot—not a real-time feed.' : 'No verified results snapshot yet.'}</p>
+<p class="small" data-compact-freshness aria-live="polite">{connected ? 'Timestamped ESPN snapshot—not a real-time feed.' : 'No verified results snapshot yet.'}</p>
 <section aria-labelledby="matchups">
   <div class="section-heading"><h2 id="matchups">This week's matchups</h2><span class="small muted">{connected ? 'ESPN SNAPSHOT' : 'NOT CONNECTED'}</span></div>
   {connected ? <>
@@ -28,8 +30,8 @@ const name = side => side ? (names.get(side.teamId) || 'Team unavailable') : 'BY
   <div class="section-heading"><h2 id="standings">League standings</h2><span class="small muted">{connected ? 'ESPN RECORDS' : 'NO VERIFIED DATA'}</span></div>
   {connected ? <>
     <p class="small muted" style="margin-top:16px">ESPN's current playoff-seed order and overall record. {category ? 'Category-league records can count category results, not just weekly wins.' : 'Records are reported directly by ESPN.'} Missing ranks are not invented.</p>
-    <div class="table-wrap"><table><thead><tr><th scope="col">Rank</th><th scope="col">Team</th><th scope="col">W–L–T</th></tr></thead><tbody>{teams.map(t=><tr><td>{t.standing ?? '—'}</td><th scope="row">{t.name}</th><td>{t.wins}–{t.losses}–{t.ties}</td></tr>)}</tbody></table></div>
-    <p class="small muted">Names above come from ESPN. Links to manager profiles will wait until ESPN team IDs are explicitly verified.</p>
+    <div class="table-wrap"><table><thead><tr><th scope="col">Rank</th><th scope="col">Team</th><th scope="col">W–L–T</th></tr></thead><tbody>{teams.map(t=><tr><td>{t.standing ?? '—'}</td><th scope="row">{teamLabel(t.id,editorial.cast)}</th><td>{t.wins}–{t.losses}–{t.ties}</td></tr>)}</tbody></table></div>
+    <p class="small muted">Owner-approved display names. ESPN ranks, records and source identifiers remain unchanged; fictional character names are not scoring evidence.</p>
   </> : <div class="empty"><p>Actual ranks and records will appear after authorized retrieval and validation. No imaginary champions here.</p></div>}
 </section>
 <style>
