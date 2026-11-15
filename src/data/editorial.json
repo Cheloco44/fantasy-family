@@ -152,6 +152,94 @@
       ],
       "approvalStatus": "approved",
       "contextType": "evergreen"
+    },
+    {
+      "id": "nov13-25-ben-junebug",
+      "image": "memes/approved/05-nov13-25.png",
+      "caption": "June Bug escapes Ben Bunny by 1 — The unsubscribe button survives another dramatic inspection.",
+      "date": "2026-11-13",
+      "managers": [
+        "ben",
+        "zach"
+      ],
+      "tags": [
+        "2026-27",
+        "nov13",
+        "daily-round",
+        "fictional-banter"
+      ],
+      "approvalStatus": "approved",
+      "contextType": "dated",
+      "scoreContext": {
+        "4": 24.0,
+        "3": 25.0
+      }
+    },
+    {
+      "id": "nov13-26-autoerik-irbob",
+      "image": "memes/approved/05-nov13-26.png",
+      "caption": "Auto Erik escapes IR BOB by 0.55 — IR BOB needs an opposition strategy beyond louder folding chairs.",
+      "date": "2026-11-13",
+      "managers": [
+        "robert",
+        "erik"
+      ],
+      "tags": [
+        "2026-27",
+        "nov13",
+        "daily-round",
+        "fictional-banter"
+      ],
+      "approvalStatus": "approved",
+      "contextType": "dated",
+      "scoreContext": {
+        "6": 15.95,
+        "7": 16.5
+      }
+    },
+    {
+      "id": "nov13-27-jiveturkey-commissioner",
+      "image": "memes/approved/05-nov13-27.png",
+      "caption": "Jive Turkey escapes The Commissioner by 0.75 — The constitution offers no points for the fancy chair.",
+      "date": "2026-11-13",
+      "managers": [
+        "kyle",
+        "marcelo"
+      ],
+      "tags": [
+        "2026-27",
+        "nov13",
+        "daily-round",
+        "fictional-banter"
+      ],
+      "approvalStatus": "approved",
+      "contextType": "dated",
+      "scoreContext": {
+        "1": 12.75,
+        "8": 13.5
+      }
+    },
+    {
+      "id": "nov13-28-caveman-juice",
+      "image": "memes/approved/05-nov13-28.png",
+      "caption": "The Caveman outpoints The Juice — The Juice has misplaced the comeback-movie script.",
+      "date": "2026-11-13",
+      "managers": [
+        "rich",
+        "jake"
+      ],
+      "tags": [
+        "2026-27",
+        "nov13",
+        "daily-round",
+        "fictional-banter"
+      ],
+      "approvalStatus": "approved",
+      "contextType": "dated",
+      "scoreContext": {
+        "2": 0.0,
+        "5": 8.5
+      }
     }
   ]
 }
