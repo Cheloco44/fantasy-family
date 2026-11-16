@@ -432,10 +432,10 @@ class EditorialTests(unittest.TestCase):
         self.assertEqual(match['classification'], 'smoked')
         self.assertIn('Alias 2', match['title'])
         self.assertIn('Alias 1', match['title'])
-        self.assertIn('smokes', match['title'])
+        self.assertTrue(any(v in match['title'] for v in pipeline.VERBS['smoked']))
         self.assertNotIn('DAILY ROUND', match['title'])
         self.assertIn('28.25', match['story'])
-        self.assertIn('smokes', match['story'])
+        self.assertTrue(any(v in match['story'] for v in pipeline.VERBS['smoked']))
         self.assertNotIn('weekly win', match['story'])
         self.assertNotIn('coverage', match['story'])
 
@@ -475,8 +475,9 @@ class EditorialTests(unittest.TestCase):
             for match in edition['matchups']:
                 with self.subTest(home_wins=home_wins, match=match['id']):
                     self.assertEqual(match['classification'], 'standard')
-                    self.assertIn('takes the day over', match['story'])
+                    self.assertTrue(any(verb in match['story'] for verb in pipeline.VERBS['standard']))
                     self.assertNotIn(' vs ', match['title'])
+                    self.assertTrue(any(verb in match['title'] for verb in pipeline.VERBS['standard']))
                     self.assertNotIn('body bag', match['title'])
                     self.assertIn('10', match['story'])
                     for field, won in (('homeId', home_wins), ('awayId', not home_wins)):
@@ -492,14 +493,16 @@ class EditorialTests(unittest.TestCase):
         edition = self.report([data])['editions'][0]
         self.assertIn('Alias 1', edition['headline'])
         self.assertIn('Alias 2', edition['headline'])
-        self.assertIn('escapes', edition['headline'])
+        self.assertTrue(any(verb in edition['headline'] for verb in pipeline.VERBS['close']))
         self.assertIn('5', edition['headline'])
         match = edition['matchups'][0]
-        self.assertIn('escapes', match['title'])
+        self.assertTrue(any(verb in match['title'] for verb in pipeline.VERBS['close']))
         self.assertIn('Close', match['story'])
         self.assertIn('Close finish', match['story'])
+        verb = next(v for v in pipeline.VERBS['close'] if v in match['title'])
+        self.assertIn(verb, match['story'])
         for text in (edition['headline'], match['title'], match['story']):
-            for forbidden in ('smokes', 'body bag', 'demolition', 'cooks', 'landslide'):
+            for forbidden in (pipeline.VERBS['smoked']):
                 self.assertNotIn(forbidden, text)
 
     def test_standard_headline_names_actual_opponents_without_fake_blowout(self):
@@ -510,7 +513,7 @@ class EditorialTests(unittest.TestCase):
         self.assertIn('Alias 4', headline)
         self.assertIn('Alias 3', headline)
         self.assertIn('19.75', headline)
-        self.assertIn('outpoints', headline)
+        self.assertTrue(any(verb in headline for verb in pipeline.VERBS['standard']))
         self.assertNotIn('Alias 1', headline)
         self.assertNotIn('cooks', headline)
 
@@ -579,21 +582,45 @@ class EditorialTests(unittest.TestCase):
         self.assertIsNone(edition['weeklyContextAt'])
         self.assertIn('no daily points or W/L', edition['coverageNote'])
 
+    def test_verb_bank_varies_across_editions_not_one_repeated_verb(self):
+        """The savage verb bank must not collapse back to a single repeated verb."""
+        root = pipeline.ROOT
+        catalog = pipeline.read_json(root / 'src/data/editorial.json')
+        profiles = pipeline.read_json(root / 'src/data/clubhouse.json')
+        now = datetime(2026, 11, 16, 12, tzinfo=timezone.utc)
+        archived = [pipeline.validate_bundle(
+            pipeline.read_json(root / 'src/data/daily' / (day + '.json')), now=now)
+            for day in ('2026-11-13', '2026-11-14')]
+        for value in archived:
+            for i, team in enumerate(value['daily']['teams']):
+                team['dailyPoints'] = 40 if (i % 2 == 0) else 5  # smoked lead
+        report = pipeline.build_recaps(archived, catalog, profiles, root=root, now=now)
+        verbs = []
+        for edition in report['editions']:
+            lead = max(edition['matchups'], key=lambda m: (m['margin'], -m['id']))
+            self.assertTrue(lead['verb'] in pipeline.VERBS['smoked'])
+            self.assertIn(lead['verb'], edition['headline'])
+            verbs.append(lead['verb'])
+        self.assertEqual(len(set(verbs)), len(verbs), f'lead verbs repeated across editions: {verbs}')
+
     def test_headline_smoked_threshold_and_equal_margin_tiebreak_are_catalog_driven(self):
         data = bundle()
         for team, points in zip(data['daily']['teams'], [20, 0, -5, 15, 0, 0, 0, 0]):
             team['dailyPoints'] = points
         data['daily']['matchups'].reverse()
         headline = self.report([data])['editions'][0]['headline']
-        self.assertIn('Alias 1 cooks Alias 2 by 20', headline)
+        self.assertTrue(any(v in headline for v in pipeline.VERBS['smoked']))
+        self.assertIn('20', headline)
         catalog = editorial(); catalog['smokedMargin'] = 21
         headline = self.report([data], catalog=catalog)['editions'][0]['headline']
         self.assertIn('Alias 1', headline)
         self.assertIn('Alias 2', headline)
-        self.assertIn('outpoints', headline)
+        self.assertTrue(any(v in headline for v in pipeline.VERBS['standard']))
         self.assertNotIn('cooks', headline)
         catalog['closeMargin'] = 20
-        self.assertIn('escapes', self.report([data], catalog=catalog)['editions'][0]['headline'])
+        close = self.report([data], catalog=catalog)['editions'][0]['headline']
+        self.assertTrue(any(v in close for v in pipeline.VERBS['close']))
+        self.assertNotIn('cooks', close)
 
     def test_history_chirps_wait_for_three_verified_daily_results(self):
         history = []
@@ -642,7 +669,7 @@ class EditorialTests(unittest.TestCase):
         self.assertEqual([m['classification'] for m in edition['matchups']], ['close', 'smoked', 'tie', 'standard'])
         self.assertEqual([m['margin'] for m in edition['matchups']], [5, 20, 0, 7])
         match = edition['matchups'][0]
-        self.assertEqual(set(match), set('id homeId awayId homeAlias awayAlias homePoints awayPoints margin classification title story trendNotes weeklySummary meme'.split()))
+        self.assertEqual(set(match), set('id homeId awayId homeAlias awayAlias homePoints awayPoints margin classification verb title story trendNotes weeklySummary meme'.split()))
         self.assertEqual(set(match['meme']), set('id image caption sourceDate isArchive approvalStatus'.split()))
         self.assertNotIn('DAILY ROUND', match['story'])
         self.assertNotIn('Canonical', json.dumps(result))

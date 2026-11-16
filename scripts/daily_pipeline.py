@@ -485,6 +485,23 @@ def rolling_note(bundles, day, tid, alias, *, brief=False):
     return note
 
 
+# Savage, factual-only verb banks per classification. The winner really beat the
+# loser by the verified margin; the verbs only crank the mockery. Selected
+# deterministically through CopySelector so one edition never re-uses a verb and
+# adjacent editions do not repeat each other.
+VERBS = {
+    'smoked': ('smokes', 'annihilates', 'obliterates', 'dismantles', 'pounds',
+               'dump-trucks', 'sawdusts', 'vaporizes', 'chainsaws', 'flattens'),
+    'close': ('escapes', 'squeaks past', 'nips', 'steals', 'outlasts', 'lurches past'),
+    'standard': ('outpoints', 'tops', 'whacks', 'strolls past', 'dunks on', 'surfboards past',
+                 'crumple-tosses the plan over'),
+}
+
+
+def pick_verb(selector, slug, classification, match_id):
+    return selector.choose(VERBS[classification], match_id, slug + '/verb', 'verb')
+
+
 # Two additional complete jokes per outcome, not synonym substitutions.
 CHIRP_VARIANTS = {
     'marcelo': (
@@ -677,15 +694,16 @@ def build_recaps(bundles, catalog, profiles, *, root=ROOT, now=None):
                 else:
                     winner, loser = (home['displayName'], away['displayName']) if hp > ap else (away['displayName'], home['displayName'])
                     classification = 'close' if margin <= catalog['closeMargin'] else 'smoked' if margin >= catalog['smokedMargin'] else 'standard'
+                    verb = pick_verb(copy, winner, classification, match['id'])
                     if classification == 'close':
-                        title = f'{winner} escapes {loser} — by {margin:g}'
-                        story = f'{winner} edges {loser} by {margin:g}. Close finish. '
+                        title = f'{winner} {verb} {loser} — by {margin:g}'
+                        story = f'{winner} {verb} {loser} by {margin:g}. Close finish. '
                     elif classification == 'smoked':
-                        title = f'{winner} smokes {loser}'
-                        story = f'{winner} smokes {loser} by {margin:g}. '
+                        title = f'{winner} {verb} {loser}'
+                        story = f'{winner} {verb} {loser} by {margin:g}. '
                     else:
-                        title = f'{winner} outpoints {loser}'
-                        story = f'{winner} takes the day over {loser} by {margin:g}. '
+                        title = f'{winner} {verb} {loser}'
+                        story = f'{winner} {verb} {loser} by {margin:g}. '
                     story += ' '.join(filter(None, (
                         character_chirp(home['slug'], hp > ap, selector=copy, match_id=match['id']),
                         character_chirp(away['slug'], ap > hp, selector=copy, match_id=match['id']))))
@@ -710,7 +728,7 @@ def build_recaps(bundles, catalog, profiles, *, root=ROOT, now=None):
                 story = ' '.join([story.strip(), *brief_chirps])
             matches.append(dict(id=match['id'], homeId=hid, awayId=aid, homeAlias=home['displayName'],
                 awayAlias=away['displayName'], homePoints=hp, awayPoints=ap, margin=margin,
-                classification=classification, title=title, story=story,
+                classification=classification, verb=verb if classification in VERBS else None, title=title, story=story,
                 trendNotes=[rolling_note(bundles, day, tid, person['displayName']) for tid, person in ((hid, home), (aid, away))],
                 weeklySummary=weekly, meme=choose_meme(catalog, avatars, day, home['slug'], away['slug'], points)))
         coverage = ('No scheduled NHL games in complete public schedule evidence; no daily points or W/L awarded.' if status == 'off-day' else
@@ -729,9 +747,8 @@ def build_recaps(bundles, catalog, profiles, *, root=ROOT, now=None):
                                  (lead['awayAlias'], lead['homeAlias']))
                 winner_id = lead['homeId'] if lead['homePoints'] > lead['awayPoints'] else lead['awayId']
                 slug = catalog['cast'][str(winner_id)]['slug']
-                verb = {'smoked': 'cooks', 'close': 'escapes', 'standard': 'outpoints'}[lead['classification']]
                 gag = copy.choose(HEADLINE_GAGS.get(slug, FALLBACK_GAGS), lead['id'], slug, 'headline')
-                headline = f"{winner} {verb} {loser} by {lead['margin']:g} — {gag}"
+                headline = f"{winner} {lead['verb']} {loser} by {lead['margin']:g} — {gag}"
             else:
                 headline = 'Scores tied — No daily winner. Nobody gets the victory lap.'
         editions.append(dict(date=day, sourceFetchedAt=daily['fetchedAt'], sourceRunUrl=daily['sourceRunUrl'],
