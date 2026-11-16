@@ -421,7 +421,7 @@ def validate_catalog(catalog, profiles, root):
             require(re.fullmatch(r'#[0-9]{2}', ref) is not None)
             require(ref not in refs); refs.add(ref)
         if 'pairingLabel' in meme:
-            require(type(meme['pairingLabel']) is str and 1 <= len(meme['pairingLabel']) <= 120)
+            text(meme['pairingLabel'])
         if 'scoreContext' in meme:
             context = meme['scoreContext']
             require(type(context) is dict and bool(context) and set(context) <= set(cast))
