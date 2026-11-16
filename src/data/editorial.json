@@ -49,6 +49,8 @@
   "approvedMemes": [
     {
       "id": "nov11-01-kyle-coup",
+      "ref": "#01",
+      "pairingLabel": "Jive Turkey ⚔ The Commissioner",
       "image": "memes/approved/01-kyle-coup.jpg",
       "caption": "The coup has a daily limit. Won the day; still blaming AI.",
       "date": "2026-11-11",
@@ -71,6 +73,8 @@
     },
     {
       "id": "nov11-02-ben-bug",
+      "ref": "#02",
+      "pairingLabel": "Ben Bunny ⚔ June Bug",
       "image": "memes/approved/02-ben-bug.jpg",
       "caption": "The Bunny found the bug zapper.",
       "date": "2026-11-11",
@@ -93,6 +97,8 @@
     },
     {
       "id": "nov11-03-anti-skynet",
+      "ref": "#03",
+      "pairingLabel": "IR BOB ⚔ Auto Erik",
       "image": "memes/approved/03-anti-skynet.jpg",
       "caption": "Skynet met the team-mom group chat.",
       "date": "2026-11-11",
@@ -115,6 +121,8 @@
     },
     {
       "id": "nov11-04-juice-caveman",
+      "ref": "#04",
+      "pairingLabel": "The Caveman ⚔ The Juice",
       "image": "memes/approved/04-juice-caveman.jpg",
       "caption": "All that juice. Still got clubbed.",
       "date": "2026-11-11",
@@ -137,6 +145,8 @@
     },
     {
       "id": "nov12-05-irbob-skynet",
+      "ref": "#05",
+      "pairingLabel": "IR BOB ⚔ Auto Erik (evergreen)",
       "image": "memes/approved/05-irbob-skynet.jpg",
       "caption": "UNSUBSCRIBE. Skynet had a plan. IR BOB removed it from the group chat.",
       "date": "2026-11-12",
@@ -155,6 +165,8 @@
     },
     {
       "id": "nov13-25-ben-junebug",
+      "ref": "#06",
+      "pairingLabel": "Ben Bunny ⚔ June Bug",
       "image": "memes/approved/05-nov13-25.png",
       "caption": "June Bug escapes Ben Bunny by 1 — The unsubscribe button survives another dramatic inspection.",
       "date": "2026-11-13",
@@ -177,6 +189,8 @@
     },
     {
       "id": "nov13-26-autoerik-irbob",
+      "ref": "#07",
+      "pairingLabel": "IR BOB ⚔ Auto Erik",
       "image": "memes/approved/05-nov13-26.png",
       "caption": "Auto Erik escapes IR BOB by 0.55 — IR BOB needs an opposition strategy beyond louder folding chairs.",
       "date": "2026-11-13",
@@ -199,6 +213,8 @@
     },
     {
       "id": "nov13-27-jiveturkey-commissioner",
+      "ref": "#08",
+      "pairingLabel": "Jive Turkey ⚔ The Commissioner",
       "image": "memes/approved/05-nov13-27.png",
       "caption": "Jive Turkey escapes The Commissioner by 0.75 — The constitution offers no points for the fancy chair.",
       "date": "2026-11-13",
@@ -221,6 +237,8 @@
     },
     {
       "id": "nov13-28-caveman-juice",
+      "ref": "#09",
+      "pairingLabel": "The Caveman ⚔ The Juice",
       "image": "memes/approved/05-nov13-28.png",
       "caption": "The Caveman outpoints The Juice — The Juice has misplaced the comeback-movie script.",
       "date": "2026-11-13",
