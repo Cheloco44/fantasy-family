@@ -173,7 +173,7 @@ def _savagery(classification):
 
 
 CHARACTER_BRIEFS = {
-    'marcelo': 'a large strongman Commissioner with an absurd royal throne',
+    'marcelo': 'a large strongman Commissioner with an absurd royal throne; his team is the FUPA, a giant extra flap of belly fat that can swallow and slowly digest whoever loses to him',
     'rich': 'The Juice cartoon character with exaggerated supplement-powered muscles',
     'zach': 'June Bug, the polite assassin with an infuriatingly courteous expression',
     'ben': 'Ben Bunny, a permanently dissatisfied winner or loser at a complaint desk',
@@ -194,9 +194,9 @@ CHARACTER_SCENES = {
         'The winner snatches his blue cap and the trophy from a closing arena door just ahead of the lunging loser.',
         'The winner casually carries the arena remote control while the loser wrestles a hopelessly tangled power cable.'),
     'marcelo': (
-        'The winner lounges on a ludicrously oversized throne; the loser receives a tiny jester stool and an enormous consolation cushion.',
+        'The winner lounges on a ludicrously oversized throne; the loser slips into the giant FUPA belly flap and is visibly stuck, waist-deep, while the winner looks smug and satisfied.',
         'The winner barely balances on a tilting throne as the loser nearly pulls the royal cushion away.',
-        'The winner stages an extravagant coronation for a very small trophy; the loser folds his arms and refuses to applaud.'),
+        'The winner stages an extravagant coronation for a very small trophy while the loser is half-digested, being slowly swallowed by the giant FUPA fold.'),
     'rich': (
         'The winner rides a gigantic cartoon supplement blender like a parade float; the loser sits sulking in its tiny passenger basket.',
         'The winner squeezes an oversized muscle suit through the finish gate while the loser nearly overtakes the stuck costume.',

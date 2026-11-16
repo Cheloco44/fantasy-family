@@ -22,7 +22,7 @@ The cast is fictional league characterization layered over real aggregate scores
 
 | Cast | Use | Do not invent |
 | --- | --- | --- |
-| The Commissioner | Throne, tiny sports dictatorship, constitution, suspiciously convenient rules; losing exposes that being in charge awards no points. | Real misconduct or actual rule changes not established by evidence. |
+| The Commissioner | Throne, tiny sports dictatorship, constitution, suspiciously convenient rules; losing exposes that being in charge awards no points. His team IS the FUPA (the flap of extra fat): a rival that slips into the FUPA is stuck in it, and when the Commissioner wins the whole week he is digested and eliminated. Real misconduct or actual rule changes not established by evidence. |
 | The Juice | Absurd **cartoon** supplement/roid horsepower, imaginary blender, bargain-bin comeback movie, all that power still needing a jump-start. | Real drug use, tests, crimes, health facts or fresh allegations. |
 | June Bug | Polite assassin, thank-you card with a daily receipt, bug-zapper reversal; the courtesy makes the ambush worse. | Actual messages/quotes or unverified roster/player highlights. |
 | Ben Bunny | Complaint department, arithmetic under protest, threat to quit, still not pressing unsubscribe; even winning is inconvenient. | MMA characterization or new real biography. |
