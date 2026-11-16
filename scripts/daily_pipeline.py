@@ -411,10 +411,17 @@ def validate_catalog(catalog, profiles, root):
         require(person['slug'] not in slugs and name not in names)
         slugs.add(person['slug']); names.add(name)
     require(type(catalog['approvedMemes']) is list)
-    ids = set()
+    ids = set(); refs = set()
     for meme in catalog['approvedMemes']:
-        fields = set('id image caption date managers tags approvalStatus contextType'.split())
-        require(type(meme) is dict and set(meme) in (fields, fields | {'scoreContext'}))
+        base = set('id image caption date managers tags approvalStatus contextType'.split())
+        optional = {'scoreContext', 'ref', 'pairingLabel'}
+        require(type(meme) is dict and base <= set(meme) <= base | optional)
+        if 'ref' in meme:
+            ref = text(meme['ref'])
+            require(re.fullmatch(r'#[0-9]{2}', ref) is not None)
+            require(ref not in refs); refs.add(ref)
+        if 'pairingLabel' in meme:
+            require(type(meme['pairingLabel']) is str and 1 <= len(meme['pairingLabel']) <= 120)
         if 'scoreContext' in meme:
             context = meme['scoreContext']
             require(type(context) is dict and bool(context) and set(context) <= set(cast))
