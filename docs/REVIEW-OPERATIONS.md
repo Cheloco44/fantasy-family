@@ -2,7 +2,7 @@
 
 ## Separation of responsibilities
 
-- `.github/workflows/prepare-review.yml`: 04:30 Arizona / 11:30 UTC. Read-only, authenticated aggregate collection; exact two-file normalized artifact `daily-review-input`, one-day retention. No repository writes, import, Pages permissions or deploy.
+- `.github/workflows/prepare-review.yml`: live collection to the normalized two-file artifact `daily-review-input`, one-day retention, read-only, no repo/Pages writes. Its GitHub `schedule` cron was historically unreliable (zero schedule runs observed; even `daily-clubhouse` fired hours late), so a reliable local trigger fires it instead: Hermes `neo` job `Clubhouse 04:30 Arizona review prep trigger` runs `possum_review/prepare_dispatch.py` at **04:30 Arizona / 11:30 UTC** via `gh workflow_dispatch` (`ad2ade2020e9`). Keep both; the Hermes dispatch is the dependable path.
 - Hermes profile **neo**: 05:00 packet, 05:45 reminder, 06:30 cutoff notice, delivered to the **originating Discord room**. This is a shared room, not a DM or a confidentiality boundary. No automatic family-channel blast.
 - `.github/workflows/daily-clubhouse.yml`: unchanged 06:40 preparation target and 07:00 not-before scheduled deployment gate. No new dependency on a successful review packet or owner reply.
 
@@ -25,10 +25,11 @@ The packet driver plus the thin `review_packet_reminder.py` and `review_packet_c
 Use the supported cron API/CLI; never hand-edit another profile's jobs. Register jobs paused, verify a real packet, run one delivery canary, inspect its durable delivery status, then enable recurring schedules. On this UTC scheduler the five-field expressions are:
 
 - Packet: `0 12 * * *` → 05:00 Arizona.
+- Prep dispatch: `30 11 * * *` → 04:30 Arizona (fires `prepare-review.yml` via `gh`).
 - Reminder: `45 12 * * *` → 05:45 Arizona.
 - Cutoff: `30 13 * * *` → 06:30 Arizona.
 
-Verify the stored **next_run_at** values in Arizona after creation rather than trusting host timezone assumptions. Keep origin routing set by the current conversation's runtime; do not guess a Discord channel ID from a display label. Set `no_agent: true`, a fixed profile-relative script, and the scoped project `workdir`. No provider/model pin is needed.
+Verify the stored **next_run_at** values in Arizona after creation rather than trusting host timezone assumptions. The 04:30 prep dispatch and the 05:00 packet are separate jobs; if the prep runner is slow, the 05:00 packet reports "unavailable" safely and can be re-run after the prep completes. Keep origin routing set by the current conversation's runtime; do not guess a Discord channel ID from a display label. Set `no_agent: true`, a fixed profile-relative script, and the scoped project `workdir`. No provider/model pin is needed.
 
 Runtime installation and delivery receipts are local operational evidence, not website assets. Do not publish raw gateway logs, credentials, cron routing identifiers or private manifests.
 
