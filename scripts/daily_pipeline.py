@@ -519,8 +519,8 @@ CHIRP_VARIANTS = {
     'rich': (
         ('The Juice flexes cartoon roid horsepower at a mirror that has requested hazard pay. The imaginary supplement shaker gets the curtain call.',
          'The Juice has a cartoon supplement commercial ready before the confetti lands. The imaginary blender insists on top billing.'),
-        ('The Juice brought cartoon roid horsepower to an ego test and stalled. The imaginary blender is now pureeing the victory speech.',
-         'The Juice has parked the cartoon supplement tank in the consolation lane. All that imaginary muscle, defeated by a calculator.')),
+        ('Papa Biden Juice takes a fall early — the Juice went down on the opening shift and needed coaching, a Gatorade and an entire wellness plan to resume play. The imaginary blender is investigating what fell and has declined to comment.',
+         'Papa Biden Juice takes a fall early and needed coordinated group-chat assistance to get back up. The imaginary blender has opened a whole investigation and called in a wingman.')),
     'zach': (
         ('June Bug, the polite assassin, folds the result into a tiny origami dagger. The courtesy bow somehow adds insult to injury.',
          'June Bug, the polite assassin, brings a doily to the ambush. The scoreboard gets cleaned before the opponent gets consoled.'),
@@ -558,7 +558,7 @@ def character_chirp(slug, won, *, selector=None, match_id=0):
     """Owner-approved fictional cast beats, never real quotes or biographical evidence."""
     beats = {
         'marcelo': ('The Commissioner keeps the throne and graciously cancels the recount he would have demanded if he lost.', 'The Commissioner fell off his throne. Apparently the constitution forgot to award points for being in charge.'),
-        'rich': ('The Juice turns cartoon supplement horsepower into bragging rights. The imaginary blender has a better agent than the manager.', 'All that cartoon roid horsepower and The Juice still needs a jump-start. The comeback movie went straight to the bargain bin.'),
+        'rich': ('The Juice turns cartoon supplement horsepower into bragging rights. The imaginary blender has a better agent than the manager.', 'Papa Biden Juice takes a fall early — the Juice went down on the opening shift and needed coaching, a Gatorade and an entire wellness plan to resume play. The imaginary blender is investigating what fell and has declined to comment.'),
         'zach': ('June Bug, the polite assassin, sends a thank-you card with the daily receipt. Somehow the manners make it worse.', 'June Bug met the bug zapper. Impeccable manners; absolutely no refund on the result.'),
         'ben': ('Ben won and still needs something to complain about. Somebody get this man a refund for the inconvenience of winning.', 'Ben has filed a complaint against arithmetic. The threat to quit is ready; the unsubscribe button remains untouched.'),
         'jake': ('UGG. BONK. The Caveman drags the receipt back to the Stone Age. Neanderthal customer service: every complaint gets an extinction event.', 'GRONK. The Caveman brought a rock to a Wi-Fi problem. Neanderthal tech support has tried BONK and is all out of ideas.'),

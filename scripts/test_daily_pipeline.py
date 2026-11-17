@@ -442,7 +442,7 @@ class EditorialTests(unittest.TestCase):
     def test_approved_cast_gets_sharp_win_and_loss_beats_not_new_personal_dirt(self):
         beats = {
             'marcelo': (('throne', 'recount'), ('throne', 'constitution')),
-            'rich': (('cartoon supplement', 'horsepower'), ('cartoon roid', 'jump-start')),
+            'rich': (('cartoon supplement', 'horsepower'), ('Papa Biden', 'imaginary blender')),
             'zach': (('polite assassin', 'thank-you'), ('bug zapper', 'manners')),
             'ben': (('complain', 'refund'), ('complaint', 'quit')),
             'jake': (('Stone Age', 'extinction'), ('rock', 'Wi-Fi')),
