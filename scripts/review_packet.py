@@ -424,7 +424,7 @@ def notify(repo, mode, now, transport=command):
     transport(['git', 'fetch', 'origin', 'main'], cwd=repo, limit=1024)
     sha = transport(['git', 'rev-parse', 'FETCH_HEAD'], cwd=repo, limit=128).decode().strip()
     catalog = pipeline.parse_json(object_file(repo, sha, 'src/data/editorial.json', transport))
-    pipeline.keys(catalog, 'schemaVersion timezone publishTarget closeMargin smokedMargin cast approvedMemes')
+    pipeline.keys(catalog, 'schemaVersion timezone publishTarget closeMargin smokedMargin cast approvedMemes recapOverrides')
     require(catalog['schemaVersion'] == 1 and catalog['timezone'] == 'America/Phoenix'
             and catalog['publishTarget'] == '07:00' and type(catalog['approvedMemes']) is list
             and len(catalog['approvedMemes']) <= 100)

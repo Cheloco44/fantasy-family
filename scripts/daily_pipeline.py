@@ -394,11 +394,20 @@ def asset_path(image, root):
 
 
 def validate_catalog(catalog, profiles, root):
-    keys(catalog, 'schemaVersion timezone publishTarget closeMargin smokedMargin cast approvedMemes')
+    keys(catalog, 'schemaVersion timezone publishTarget closeMargin smokedMargin cast approvedMemes recapOverrides')
     require(type(catalog['schemaVersion']) is int and catalog['schemaVersion'] == 1)
     require(catalog['timezone'] == TIME_ZONE and catalog['publishTarget'] == '07:00')
     require(type(catalog['closeMargin']) is int and 0 <= catalog['closeMargin'] <= 1000)
     require(type(catalog['smokedMargin']) is int and catalog['closeMargin'] < catalog['smokedMargin'] <= 10000)
+    overrides = catalog['recapOverrides']
+    require(type(overrides) is dict)
+    for day, entry in overrides.items():
+        require(date.fromisoformat(day).isoformat() == day)
+        require(type(entry) is dict and set(entry) <= {'headline', 'dek'})
+        if 'headline' in entry:
+            text(entry['headline'])
+        if 'dek' in entry:
+            text(entry['dek'])
     cast = catalog['cast']
     require(type(cast) is dict and set(cast) == {str(i) for i in range(1, 9)})
     slugs, names = set(), set()
@@ -758,9 +767,13 @@ def build_recaps(bundles, catalog, profiles, *, root=ROOT, now=None):
                 headline = f"{winner} {lead['verb']} {loser} by {lead['margin']:g} — {gag}"
             else:
                 headline = 'Scores tied — No daily winner. Nobody gets the victory lap.'
+        override = catalog.get('recapOverrides', {}).get(day, {})
+        if 'headline' in override:
+            headline = text(override['headline'])
+        dek = text(override['dek']) if 'dek' in override else 'Yesterday’s points. Today’s grudges.'
         editions.append(dict(date=day, sourceFetchedAt=daily['fetchedAt'], sourceRunUrl=daily['sourceRunUrl'],
             scoringPeriodId=daily['scoringPeriodId'], matchupPeriodId=daily['matchupPeriodId'], status=status,
-            headline=headline, dek='Yesterday’s points. Today’s grudges.',
+            headline=headline, dek=dek,
             coverageNote=coverage, weeklyContextAt=current['fetchedAt'] if any(m['weeklySummary'] is not None for m in matches) else None,
             matchups=matches))
         previous_gags = copy.used

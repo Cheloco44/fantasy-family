@@ -4,6 +4,11 @@
   "publishTarget": "07:00",
   "closeMargin": 5,
   "smokedMargin": 20,
+  "recapOverrides": {
+    "2026-11-16": {
+      "headline": "CNN — Papa Biden Juice takes a fall early — Jive Turkey outpoints The Juice by 16.65"
+    }
+  },
   "cast": {
     "1": {
       "slug": "marcelo",

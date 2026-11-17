@@ -248,6 +248,7 @@ class CollectionTests(unittest.TestCase):
 
 def editorial():
     return dict(schemaVersion=1, timezone='America/Phoenix', publishTarget='07:00', closeMargin=5, smokedMargin=20,
+                recapOverrides={},
                 cast={str(i): dict(slug=f'person-{i}', displayName=f'Alias {i}') for i in range(1, 9)},
                 approvedMemes=[dict(id='dated', image='memes/approved.jpg', caption='Approved daily cartoon',
                     date='2026-11-11', managers=['person-1', 'person-2'], tags=['daily-round'],
@@ -602,6 +603,17 @@ class EditorialTests(unittest.TestCase):
             self.assertIn(lead['verb'], edition['headline'])
             verbs.append(lead['verb'])
         self.assertEqual(len(set(verbs)), len(verbs), f'lead verbs repeated across editions: {verbs}')
+
+    def test_dated_recap_override_replaces_headline_only_for_that_date(self):
+        """Owner-supplied dated headline override applies only to its date's edition."""
+        data = bundle()  # 2026-11-11, real verified
+        catalog = editorial(); catalog['recapOverrides'] = {'2026-11-11': {'headline': 'CNN — EXACT OVERRIDE HEADLINE'}}
+        edition = self.report([data], catalog=catalog)['editions'][0]
+        self.assertEqual(edition['headline'], 'CNN — EXACT OVERRIDE HEADLINE')
+        # A different date's override must NOT leak in.
+        catalog2 = editorial(); catalog2['recapOverrides'] = {'2026-11-12': {'headline': 'WRONG DATE'}}
+        edition2 = self.report([data], catalog=catalog2)['editions'][0]
+        self.assertNotEqual(edition2['headline'], 'WRONG DATE')
 
     def test_headline_smoked_threshold_and_equal_margin_tiebreak_are_catalog_driven(self):
         data = bundle()
