@@ -282,6 +282,46 @@
       ],
       "approvalStatus": "approved",
       "contextType": "evergreen"
+    },
+    {
+      "id": "nov17-29-commissioner-autoerik", "ref": "#11",
+      "pairingLabel": "The Commissioner ⚔ Auto Erik",
+      "image": "memes/approved/11-nov17-commissioner-autoerik.webp",
+      "caption": "The Commissioner sawdusts Auto Erik by 43.05. SYSTEM: insufficient legroom under the FUPA.",
+      "date": "2026-11-17", "managers": ["marcelo", "erik"],
+      "tags": ["2026-27", "nov17", "daily-round", "fictional-banter"],
+      "approvalStatus": "approved", "contextType": "dated",
+      "scoreContext": {"1": 85.05, "7": 42.0}
+    },
+    {
+      "id": "nov17-31-ben-irbob", "ref": "#12",
+      "pairingLabel": "Ben Bunny ⚔ IR BOB",
+      "image": "memes/approved/12-nov17-ben-irbob.webp",
+      "caption": "Ben Bunny annihilates IR BOB by 31.75. Complaints accepted. Bragging rights repossessed.",
+      "date": "2026-11-17", "managers": ["ben", "robert"],
+      "tags": ["2026-27", "nov17", "daily-round", "fictional-banter"],
+      "approvalStatus": "approved", "contextType": "dated",
+      "scoreContext": {"4": 83.25, "6": 51.5}
+    },
+    {
+      "id": "nov17-30-caveman-junebug", "ref": "#13",
+      "pairingLabel": "The Caveman ⚔ June Bug",
+      "image": "memes/approved/13-nov17-caveman-junebug.webp",
+      "caption": "The Caveman steals the day by 0.45. UGG. BONK. June Bug demands a receipt inspection.",
+      "date": "2026-11-17", "managers": ["jake", "zach"],
+      "tags": ["2026-27", "nov17", "daily-round", "fictional-banter"],
+      "approvalStatus": "approved", "contextType": "dated",
+      "scoreContext": {"5": 87.15, "3": 86.7}
+    },
+    {
+      "id": "nov17-32-juice-jiveturkey", "ref": "#14",
+      "pairingLabel": "The Juice ⚔ Jive Turkey",
+      "image": "memes/approved/14-nov17-juice-jiveturkey.webp",
+      "caption": "The Juice outpoints Jive Turkey by 13.10. The blender approves. Tech support has disconnected.",
+      "date": "2026-11-17", "managers": ["rich", "kyle"],
+      "tags": ["2026-27", "nov17", "daily-round", "fictional-banter"],
+      "approvalStatus": "approved", "contextType": "dated",
+      "scoreContext": {"2": 87.25, "8": 74.15}
     }
   ]
 }
