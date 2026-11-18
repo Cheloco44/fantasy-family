@@ -263,6 +263,25 @@
         "2": 0.0,
         "5": 8.5
       }
+    },
+    {
+      "id": "evergreen-10-chrome-robot-monkey",
+      "ref": "#10",
+      "pairingLabel": "Auto Erik ⚔ Jive Turkey (evergreen)",
+      "image": "memes/approved/10-chrome-robot-monkey.png",
+      "caption": "Even Skynet tucks in the Young Monkey when the chips are down. No rage loop tonight — just bedtime.",
+      "date": "2026-11-12",
+      "managers": [
+        "erik",
+        "kyle"
+      ],
+      "tags": [
+        "2026-27",
+        "rivalry",
+        "fictional-banter"
+      ],
+      "approvalStatus": "approved",
+      "contextType": "evergreen"
     }
   ]
 }
