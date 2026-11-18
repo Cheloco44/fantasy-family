@@ -1,0 +1,13 @@
+---
+const { item, base } = Astro.props;
+---
+<article class="archive-card" data-archive-id={item.id}>
+  <figure class="archive-art"><img src={`${base}${item.image}`} alt={item.description} width="1672" height="1199" /></figure>
+  <div class="archive-copy">
+    <span class="eyebrow">AN OLD FAVORITE. A FRESH ROAST.</span>
+    <h2>{item.title}</h2>
+    <p class="archive-scene">{item.description}</p>
+    <p class="archive-joke">{item.joke}</p>
+    <p class="small muted">From the collection · {item.ref} · Historical fictional banter, not today’s result.</p>
+  </div>
+</article>

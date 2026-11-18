@@ -1,0 +1,64 @@
+---
+import ArchiveCard from './ArchiveCard.astro';
+import { pickArchive } from '../lib/archive-pick.mjs';
+const { pool } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const initial = pickArchive(pool);
+---
+<section class="daily-archive" data-daily-archive aria-labelledby="daily-archive-title">
+  <header class="archive-heading">
+    <div><span class="eyebrow">THE MEME LOCKER</span><h1 id="daily-archive-title">From the archives.</h1><p>One classic from the vault. Because the group chat never forgets.</p></div>
+    <p class="archive-day">Archive selection<br/><time data-archive-day datetime={initial.date}>{initial.date}</time><br/><span class="small">America/Phoenix</span></p>
+  </header>
+  <div data-archive-current aria-live="polite">
+    {initial.item ? <ArchiveCard item={initial.item} base={base} /> : <p>No archive feature is approved yet.</p>}
+  </div>
+  <div hidden>{pool.map(item => <template data-archive-template={item.id}><ArchiveCard item={item} base={base} /></template>)}</div>
+  <p class="small muted archive-rotation-note">One shared pick each Arizona day. {pool.length} curated classics in rotation. More vault finds join after review.</p>
+  <noscript><p class="small muted">This is the archive selection saved at the site’s last build. Enable JavaScript for the daily selection.</p></noscript>
+</section>
+<script>
+  import { pickArchive } from '../lib/archive-pick.mjs';
+  const root = document.querySelector('[data-daily-archive]');
+  if (root) {
+    const templates = [...root.querySelectorAll('template[data-archive-template]')];
+    const pool = templates.map(template => ({ id: template.dataset.archiveTemplate }));
+    const current = root.querySelector('[data-archive-current]');
+    const day = root.querySelector('[data-archive-day]');
+    function updateArchive() {
+      const selected = pickArchive(pool);
+      if (!selected.item) return;
+      const template = templates.find(t => t.dataset.archiveTemplate === selected.item.id);
+      if (current.dataset.pick !== selected.item.id) {
+        current.replaceChildren(template.content.cloneNode(true));
+        current.dataset.pick = selected.item.id;
+      }
+      day.textContent = selected.date;
+      day.setAttribute('datetime', selected.date);
+    }
+    updateArchive();
+    setInterval(updateArchive, 60000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) updateArchive(); });
+  }
+</script>
+<style>
+.daily-archive { margin-block: 30px 42px; }
+.archive-heading { display:flex; justify-content:space-between; align-items:end; gap:24px; border-top:3px solid var(--ink); padding-top:20px; margin-bottom:24px; }
+.archive-heading h1 { font-size:clamp(38px,6vw,68px); margin:8px 0 12px; }
+.archive-heading p { margin:0; max-width:600px; }
+.archive-day { flex-shrink:0; text-align:right; font:12px/1.8 monospace; color:var(--muted); }
+.archive-rotation-note { margin-top:18px; }
+@media(max-width:620px) { .archive-heading { display:block; } .archive-heading .archive-day { text-align:left; margin-top:18px; } }
+</style>
+<style is:global>
+.archive-card { border:1px solid var(--line); background:#fffdf7; display:grid; grid-template-columns:minmax(0,1.4fr) minmax(0,1fr); }
+.archive-art { margin:0; min-width:0; display:flex; align-items:center; background:var(--dark); }
+.archive-art img { display:block; width:100%; height:auto; object-fit:contain; }
+.archive-copy { min-width:0; padding:clamp(22px,3vw,40px); align-self:center; }
+.archive-copy h2 { font-size:clamp(28px,3.2vw,44px); line-height:1.12; margin:16px 0 22px; overflow-wrap:anywhere; }
+.archive-scene { color:var(--muted); }
+.archive-joke { border-left:3px solid var(--orange); padding-left:18px; margin-block:24px; font-size:clamp(18px,2vw,23px); line-height:1.5; font-weight:700; }
+.locker-collection { border-top:1px solid var(--line); padding-top:22px; }
+.locker-collection>summary { cursor:pointer; font-weight:700; font-size:22px; padding-block:14px; }
+@media(max-width:760px) { .archive-card { grid-template-columns:minmax(0,1fr); } }
+</style>
