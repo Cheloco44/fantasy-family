@@ -615,6 +615,61 @@ class EditorialTests(unittest.TestCase):
         edition2 = self.report([data], catalog=catalog2)['editions'][0]
         self.assertNotEqual(edition2['headline'], 'WRONG DATE')
 
+    def test_dated_matchup_copy_override_is_scoped_and_keeps_facts_unchanged(self):
+        data = bundle()
+        data['daily']['teams'][0]['dailyPoints'] = 12
+        baseline = self.report([data])['editions'][0]
+        match = baseline['matchups'][0]
+        binding = {str(match['homeId']): match['homePoints'], str(match['awayId']): match['awayPoints']}
+        catalog = editorial()
+        catalog['recapOverrides'] = {'2026-11-11': {
+            'headline': 'Owner-approved front page',
+            'matchups': {str(match['id']): {'title': 'Owner-approved title',
+                'story': 'Owner-approved fictional story. ' * 12, 'scoreContext': binding}}}}
+        edition = self.report([data], catalog=catalog)['editions'][0]
+        self.assertEqual(edition['headline'], 'Owner-approved front page')
+        changed = edition['matchups'][0]
+        self.assertEqual(changed['title'], 'Owner-approved title')
+        self.assertEqual(changed['story'], 'Owner-approved fictional story. ' * 12)
+        for field in set(match) - {'title', 'story'}:
+            self.assertEqual(changed[field], match[field], field)
+        self.assertEqual(edition['matchups'][1:], baseline['matchups'][1:])
+        catalog['recapOverrides']['2026-11-12'] = catalog['recapOverrides'].pop('2026-11-11')
+        self.assertEqual(self.report([data], catalog=catalog)['editions'][0], baseline)
+
+    def test_dated_story_override_falls_back_on_corrections_or_provisional_data(self):
+        data = bundle(); data['daily']['teams'][0]['dailyPoints'] = 12
+        match = self.report([data])['editions'][0]['matchups'][0]
+        binding = {str(match['homeId']): match['homePoints'], str(match['awayId']): match['awayPoints']}
+        catalog = editorial()
+        catalog['recapOverrides'] = {'2026-11-11': {'headline': 'STORED OLD HEADLINE',
+            'matchups': {str(match['id']): {'story': 'STORED OLD STORY', 'scoreContext': binding}}}}
+        for case in ('correction', 'provisional', 'tie', 'unknown-matchup'):
+            changed = copy.deepcopy(data); c = copy.deepcopy(catalog)
+            if case == 'correction': changed['daily']['teams'][0]['dailyPoints'] = 13
+            elif case == 'provisional':
+                changed['daily']['status'] = 'incomplete'
+                changed['daily']['periodEvidence']['allGamesStatsOfficial'] = False
+            elif case == 'tie': changed['daily']['teams'][0]['dailyPoints'] = 0
+            else:
+                replacements = c['recapOverrides']['2026-11-11']['matchups']
+                replacements['999'] = replacements.pop(str(match['id']))
+            edition = self.report([changed], catalog=c)['editions'][0]
+            self.assertNotEqual(edition['headline'], 'STORED OLD HEADLINE', case)
+            self.assertNotEqual(edition['matchups'][0]['story'], 'STORED OLD STORY', case)
+
+    def test_dated_story_override_rejects_fact_edits_and_bad_bindings(self):
+        for replacement in (
+            {'story': 'Text without binding'},
+            {'story': 'Text', 'scoreContext': {'1': 12}},
+            {'story': 'Text', 'scoreContext': {'1': True, '2': 0}},
+            {'story': 'Text', 'homePoints': 999, 'scoreContext': {'1': 12, '2': 0}},
+            {'story': 999, 'scoreContext': {'1': 12, '2': 0}},
+        ):
+            catalog = editorial()
+            catalog['recapOverrides'] = {'2026-11-11': {'matchups': {'1': replacement}}}
+            with self.assertRaises(ValueError): self.report([bundle()], catalog=catalog)
+
     def test_headline_smoked_threshold_and_equal_margin_tiebreak_are_catalog_driven(self):
         data = bundle()
         for team, points in zip(data['daily']['teams'], [20, 0, -5, 15, 0, 0, 0, 0]):

@@ -57,8 +57,8 @@ def target_date(value=None, now=None):
     return result.isoformat()
 
 
-def text(value):
-    require(type(value) is str and 1 <= len(value) <= 120 and value.strip()
+def text(value, *, max_length=120):
+    require(type(value) is str and 1 <= len(value) <= max_length and value.strip()
             and not any(unicodedata.category(c).startswith('C') for c in value))
     return value
 
@@ -403,11 +403,25 @@ def validate_catalog(catalog, profiles, root):
     require(type(overrides) is dict)
     for day, entry in overrides.items():
         require(date.fromisoformat(day).isoformat() == day)
-        require(type(entry) is dict and set(entry) <= {'headline', 'dek'})
+        require(type(entry) is dict and set(entry) <= {'headline', 'dek', 'matchups'})
         if 'headline' in entry:
             text(entry['headline'])
         if 'dek' in entry:
             text(entry['dek'])
+        if 'matchups' in entry:
+            require(type(entry['matchups']) is dict and 0 < len(entry['matchups']) <= 4)
+            for mid, replacement in entry['matchups'].items():
+                require(type(mid) is str and re.fullmatch(r'[1-9][0-9]{0,9}', mid) is not None)
+                require(type(replacement) is dict and {'scoreContext'} < set(replacement)
+                        and set(replacement) <= {'title', 'story', 'scoreContext'})
+                for field in ('title', 'story'):
+                    if field in replacement:
+                        text(replacement[field], max_length=4000 if field == 'story' else 120)
+                context = replacement['scoreContext']
+                require(type(context) is dict and len(context) == 2
+                        and set(context) <= {str(i) for i in range(1, 9)})
+                for score in context.values():
+                    number(score)
     cast = catalog['cast']
     require(type(cast) is dict and set(cast) == {str(i) for i in range(1, 9)})
     slugs, names = set(), set()
@@ -768,9 +782,24 @@ def build_recaps(bundles, catalog, profiles, *, root=ROOT, now=None):
             else:
                 headline = 'Scores tied — No daily winner. Nobody gets the victory lap.'
         override = catalog.get('recapOverrides', {}).get(day, {})
-        if 'headline' in override:
+        # Dated fictional copy is bound to the exact verified matchup scores.
+        # A correction or provisional status falls back to normal generated copy.
+        replacements = override.get('matchups', {})
+        applied = set()
+        for match in matches:
+            mid = str(match['id'])
+            replacement = replacements.get(mid)
+            context = {str(match['homeId']): match['homePoints'], str(match['awayId']): match['awayPoints']}
+            if (replacement is not None and status == 'verified-aggregate'
+                    and match['classification'] in VERBS and replacement['scoreContext'] == context):
+                for field in ('title', 'story'):
+                    if field in replacement:
+                        match[field] = text(replacement[field], max_length=4000 if field == 'story' else 120)
+                applied.add(mid)
+        eligible = not replacements or applied == set(replacements)
+        if eligible and 'headline' in override:
             headline = text(override['headline'])
-        dek = text(override['dek']) if 'dek' in override else 'Yesterday’s points. Today’s grudges.'
+        dek = text(override['dek']) if eligible and 'dek' in override else 'Yesterday’s points. Today’s grudges.'
         editions.append(dict(date=day, sourceFetchedAt=daily['fetchedAt'], sourceRunUrl=daily['sourceRunUrl'],
             scoringPeriodId=daily['scoringPeriodId'], matchupPeriodId=daily['matchupPeriodId'], status=status,
             headline=headline, dek=dek,

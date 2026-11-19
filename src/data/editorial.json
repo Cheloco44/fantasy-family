@@ -7,6 +7,26 @@
   "recapOverrides": {
     "2026-11-16": {
       "headline": "CNN — Papa Biden Juice takes a fall early — Jive Turkey outpoints The Juice by 16.65"
+    },
+    "2026-11-18": {
+      "headline": "IR BOB’s extra-sniff special leaves the salami smoked",
+      "matchups": {
+        "31": {
+          "title": "IR BOB’s extra-sniff special leaves the salami smoked",
+          "story": "Somewhere in IR BOB’s imaginary locker room, a player took one extra sniff of the smelling salts and decided the assignment was no longer hockey. It was deli demolition. By the time Ben Bunny understood the situation, the salami was already hanging in the smokehouse. Thirty-two-point-two-five points of separation, no ventilation, and IR BOB standing outside asking whether anybody wanted it sliced thin. Ben has filed a complaint with the butcher, the fire marshal, and whoever approved the seasoning. IR BOB has declined mediation. He’s packaging leftovers.",
+          "scoreContext": {"4": 4.25, "6": 36.5}
+        },
+        "30": {
+          "title": "June Bug extinguishes the fire. Caveman disputes the existence of water.",
+          "story": "The Caveman finally got a fire going and immediately declared himself commissioner of electricity. June Bug arrived with a bucket, put the whole thing out, and politely asked whether anybody needed help cleaning up. What followed was twelve straight minutes of imaginary Neanderthal protest: UGG! GRONK! NO WATER! FIRE GOOD! BUG BAD! The Caveman demanded a replay, struck two rocks together, and accidentally invented another reason to be furious. June Bug left with the points. The Caveman stayed behind threatening a puddle.",
+          "scoreContext": {"5": 8.5, "3": 20.0}
+        },
+        "32": {
+          "title": "Jive Turkey puts The Juice down for a mandatory nap",
+          "story": "The Juice entered the imaginary arena flexing hard enough to threaten the building’s insurance policy. Unfortunately, his cartoon steroid power-up came with a battery indicator — and it had been blinking red since warmups. Jive Turkey watched the flexing slow down, confiscated the blender, and announced that the rest of the evening would be handled by the nap department. The Juice insisted he wasn’t tired. Then he yawned halfway through a threat. Jive tucked him in, switched the supplement commercial to a lullaby, and left a note on the door: Do not disturb. Muscles updating.",
+          "scoreContext": {"8": 18.25, "2": 8.0}
+        }
+      }
     }
   },
   "cast": {
@@ -322,6 +342,46 @@
       "tags": ["2026-27", "nov17", "daily-round", "fictional-banter"],
       "approvalStatus": "approved", "contextType": "dated",
       "scoreContext": {"2": 87.25, "8": 74.15}
+    },
+    {
+      "id": "nov18-31-irbob-ben", "ref": "#15",
+      "pairingLabel": "IR BOB ⚔ Ben Bunny",
+      "image": "memes/approved/15-nov18-irbob-ben.webp",
+      "caption": "IR BOB’s extra-sniff special leaves the salami smoked. Ben is filing a complaint with the butcher.",
+      "date": "2026-11-18", "managers": ["robert", "ben"],
+      "tags": ["2026-27", "nov18", "daily-round", "fictional-banter"],
+      "approvalStatus": "approved", "contextType": "dated",
+      "scoreContext": {"6": 36.5, "4": 4.25}
+    },
+    {
+      "id": "nov18-29-commissioner-autoerik", "ref": "#16",
+      "pairingLabel": "The Commissioner ⚔ Auto Erik",
+      "image": "memes/approved/16-nov18-commissioner-autoerik.webp",
+      "caption": "The Commissioner installs the humility patch. Auto Erik is buffering an excuse at one percent.",
+      "date": "2026-11-18", "managers": ["marcelo", "erik"],
+      "tags": ["2026-27", "nov18", "daily-round", "fictional-banter"],
+      "approvalStatus": "approved", "contextType": "dated",
+      "scoreContext": {"1": 39.75, "7": 23.55}
+    },
+    {
+      "id": "nov18-30-junebug-caveman", "ref": "#17",
+      "pairingLabel": "June Bug ⚔ The Caveman",
+      "image": "memes/approved/17-nov18-junebug-caveman.webp",
+      "caption": "June Bug puts out the fire. UGG! GRONK! The Caveman is now threatening a puddle.",
+      "date": "2026-11-18", "managers": ["zach", "jake"],
+      "tags": ["2026-27", "nov18", "daily-round", "fictional-banter"],
+      "approvalStatus": "approved", "contextType": "dated",
+      "scoreContext": {"3": 20.0, "5": 8.5}
+    },
+    {
+      "id": "nov18-32-jiveturkey-juice", "ref": "#18",
+      "pairingLabel": "Jive Turkey ⚔ The Juice",
+      "image": "memes/approved/18-nov18-jiveturkey-juice.webp",
+      "caption": "Jive Turkey enforces nappy time. Do not disturb. Muscles updating.",
+      "date": "2026-11-18", "managers": ["kyle", "rich"],
+      "tags": ["2026-27", "nov18", "daily-round", "fictional-banter"],
+      "approvalStatus": "approved", "contextType": "dated",
+      "scoreContext": {"8": 18.25, "2": 8.0}
     }
   ]
 }
